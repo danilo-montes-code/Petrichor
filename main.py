@@ -1,6 +1,5 @@
 import discord, os
 from dotenv import load_dotenv
-from keep_alive import keep_alive
 from discord import Message
 load_dotenv()
 
@@ -24,6 +23,4 @@ async def on_message(message: Message):
         power = client.get_channel(int(os.getenv('POWER_ID')))
         await power.send(content=content)
 
-
-keep_alive()
 client.run(os.getenv('BOT_TOKEN'))
