@@ -1,7 +1,7 @@
 import discord, os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from discord import Message
-load_dotenv()
+# load_dotenv()
 
 intents = discord.Intents.default()
 intents.message_content = True
