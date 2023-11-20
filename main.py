@@ -36,7 +36,7 @@ async def on_message(message: Message) -> None:
         await power.send(content=content)
         return
 
-    if 'crazy' in message.content:
+    if 'crazy' in message.content.lower():
         await client.get_channel(message.channel.id) \
                     .send(content='crazy? i was crazy once.')
         return
