@@ -1,9 +1,9 @@
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
 import discord
 from discord import Message
 
 import os
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.cron import CronTrigger   
 
 ### handled by pipenv
 # from dotenv import load_dotenv
@@ -17,6 +17,18 @@ client = discord.Client(intents=intents)
 
 @client.event
 async def on_ready() -> None:
+    """
+    Sets up the bot when the client has connected.
+    """
+
+    scheduler = AsyncIOScheduler()
+
+    # remind about rankdle at 9p EST
+    scheduler.add_job(remind_about_rankdle, 
+                      CronTrigger(hour=21))
+    
+    scheduler.start()
+
     print(f'User {client.user} logged in')
 
 
@@ -62,7 +74,6 @@ async def post_to_power(message_content: str) -> None:
     """
     power = client.get_channel(int(os.getenv('POWER_ID')))
     await power.send(content=message_content)
-    return
 
 
 async def respond_to_user(message: Message, response: str) -> None:
@@ -79,13 +90,14 @@ async def respond_to_user(message: Message, response: str) -> None:
     """
     await client.get_channel(message.channel.id) \
                 .send(content=response)
-    return
 
 
 async def remind_about_rankdle() -> None:
     # https://stackoverflow.com/a/63388134
 
-    return
+    content = f'Rankdle has reset! https://rankdle.com/'
+    await client.get_channel(int(os.getenv('DROPPED_ID'))) \
+                .send(content=content)
 
 
 client.run(os.getenv('BOT_TOKEN'))
