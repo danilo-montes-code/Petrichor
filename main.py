@@ -44,7 +44,7 @@ async def on_message(message: Message) -> None:
         return
 
     # funny crazy
-    if 'crazy' in message.content:
+    if 'crazy' in message.content.lower():
         await respond_to_user(message, 'crazy? i was crazy once.')
         return
 
