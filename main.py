@@ -60,7 +60,11 @@ async def on_message(message: Message) -> None:
     # to another server
     if (message.guild.id == int(os.getenv('FANTA_ID')) and 
        'clips' in message.channel.name):
+        
         await post_to_power(message.content)
+        if 'apex' in message.channel.name:
+            await post_to_apex(message.content)
+            
         return
 
     # funny crazy
@@ -81,6 +85,20 @@ async def post_to_power(message_content: str) -> None:
         the message to be transferred
     """
     power = client.get_channel(int(os.getenv('POWER_ID')))
+    await power.send(content=message_content)
+
+
+async def post_to_apex(message_content: str) -> None:
+    """
+    Posts an Apex clip from my archive server's game clips channels
+    to the Apex game clips channel.
+
+    Parameters
+    ----------
+    message_content : str
+        the message to be transferred
+    """
+    power = client.get_channel(int(os.getenv('APEX_LES_POV_ID')))
     await power.send(content=message_content)
 
 
