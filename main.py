@@ -68,7 +68,7 @@ async def on_message(message: Message) -> None:
         return
 
     # funny crazy
-    crazy_check()
+    await crazy_check(message)
 
 
 async def crazy_check(message: Message):
