@@ -68,8 +68,38 @@ async def on_message(message: Message) -> None:
         return
 
     # funny crazy
-    if 'crazy' in message.content.lower():
+    crazy_check()
+
+
+async def crazy_check(message: Message):
+    """
+    crazy? i was crazy once.
+    they locked me in a room.
+    a rubber room.
+    a rubber room with rats.
+    and rats make me crazy.
+    """
+
+    msg = message.content.lower()
+
+    # swap order to avoid wrong call
+    if 'crazy? i was crazy once' in msg:
+        await respond_to_user(message, 'they locked me in a room.')
+        return
+
+    if 'crazy' in msg:
         await respond_to_user(message, 'crazy? i was crazy once.')
+        return
+    
+    if 'locked' in msg and 'in a room' in msg:
+        await respond_to_user(message, 'a rubber room.')
+        return
+    
+    if 'a rubber room' in msg:
+        await respond_to_user(message, 'a rubber room with rats.')
+    
+    if 'rubber room with rats' in msg:
+        await respond_to_user(message, 'and rats make me crazy.')
         return
 
 
