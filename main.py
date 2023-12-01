@@ -25,7 +25,15 @@ async def on_ready() -> None:
 
     # remind about rankdle at 9p EST
     scheduler.add_job(remind_about_rankdle, 
-                      CronTrigger(hour=21))
+                      CronTrigger(hour=9 + 12))
+    
+    # remind about pokedle at 7p EST
+    scheduler.add_job(remind_about_pokedle, 
+                      CronTrigger(hour=7 + 12))
+    
+    # remind about gamedle at 9p EST
+    scheduler.add_job(remind_about_gamedle, 
+                      CronTrigger(hour=9 + 12))
     
     scheduler.start()
 
@@ -98,6 +106,24 @@ async def remind_about_rankdle() -> None:
     content = f'Rankdle has reset! https://rankdle.com/'
     await client.get_channel(int(os.getenv('DROPPED_ID'))) \
                 .send(content=content)
+    await client.get_channel(int(os.getenv('APEX_LES_GEN_ID'))) \
+                .send(content=content)
+    
+
+async def remind_about_pokedle() -> None:
+
+    content = f'Pokedle has reset! https://pokedle.io/'
+    await client.get_channel(int(os.getenv('APEX_LES_GEN_ID'))) \
+                .send(content=content)
+    
+
+async def remind_about_gamedle() -> None:
+
+    content = f'Gamedle has reset! https://www.gamedle.wtf/guess#'
+    await client.get_channel(int(os.getenv('APEX_LES_GEN_ID'))) \
+                .send(content=content)
+    
+
 
 
 client.run(os.getenv('BOT_TOKEN'))
