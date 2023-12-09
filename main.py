@@ -5,15 +5,17 @@ from discord import Message
 
 import os
 
-### handled by pipenv
-# from dotenv import load_dotenv
-# load_dotenv()
-
 intents = discord.Intents.default()
 intents.message_content = True
 client = discord.Client(intents=intents)
 
 
+
+##############################################################
+#######                                                #######
+###                    event handling                      ###
+#######                                                #######
+##############################################################
 
 @client.event
 async def on_ready() -> None:
@@ -23,18 +25,26 @@ async def on_ready() -> None:
 
     scheduler = AsyncIOScheduler()
 
-    # remind about rankdle at 9p EST
-    scheduler.add_job(remind_about_rankdle, 
-                      CronTrigger(hour=9 + 12))
-    
-    # remind about pokedle at 7p EST
-    scheduler.add_job(remind_about_pokedle, 
-                      CronTrigger(hour=7 + 12))
-    
     # remind about gamedle at 9p EST
     scheduler.add_job(remind_about_gamedle, 
                       CronTrigger(hour=9 + 12))
     
+    # remind about pokedle at 7p EST
+    scheduler.add_job(remind_about_pokedle, 
+                      CronTrigger(hour=1 + 12))
+    
+    # remind about smashdle at 1a EST
+    scheduler.add_job(remind_about_smashdle, 
+                      CronTrigger(hour=1))
+
+    # remind about rankdle at 9p EST
+    scheduler.add_job(remind_about_rankdle, 
+                      CronTrigger(hour=9 + 12))
+
+    # remind about wordle at 12a EST
+    scheduler.add_job(remind_about_wordle, 
+                      CronTrigger(hour=0))
+
     scheduler.start()
 
     print(f'User {client.user} logged in')
@@ -63,13 +73,20 @@ async def on_message(message: Message) -> None:
         
         await post_to_power(message.content)
         if 'apex' in message.channel.name:
-            await post_to_apex(message.content)
+            await post_to_apex_server(message.content)
             
         return
 
     # funny crazy
     await crazy_check(message)
 
+
+
+##############################################################
+#######                                                #######
+###                    channel posting                     ###
+#######                                                #######
+##############################################################
 
 async def crazy_check(message: Message):
     """
@@ -82,27 +99,33 @@ async def crazy_check(message: Message):
 
     msg = message.content.lower()
 
-    # swap order to avoid wrong call
-    if 'crazy? i was crazy once' in msg:
-        await respond_to_user(message, 'they locked me in a room.')
-        return
-
     if 'crazy' in msg:
-        await respond_to_user(message, 'crazy? i was crazy once.')
-        return
+        if 'i was crazy once' in msg:
+            await respond_to_user(message, 'they locked me in a room.')
+            return
+        else:
+            await respond_to_user(message, 'crazy? i was crazy once.')
+            return
     
     if 'locked' in msg and 'in a room' in msg:
         await respond_to_user(message, 'a rubber room.')
         return
     
-    if 'a rubber room' in msg:
-        await respond_to_user(message, 'a rubber room with rats.')
-    
-    if 'rubber room with rats' in msg:
-        await respond_to_user(message, 'and rats make me crazy.')
-        return
+    if 'rubber room' in msg:
+        if 'a rubber room with rats' in msg:
+            await respond_to_user(message, 'and rats make me crazy.')
+            return
+        else:
+            await respond_to_user(message, 'a rubber room with rats.')
+            return
 
 
+
+##############################################################
+#######                                                #######
+###                    channel posting                     ###
+#######                                                #######
+##############################################################
 
 async def post_to_power(message_content: str) -> None:
     """
@@ -114,11 +137,11 @@ async def post_to_power(message_content: str) -> None:
     message_content : str
         the message to be transferred
     """
-    power = client.get_channel(int(os.getenv('POWER_ID')))
+    power = client.get_channel(int(os.getenv('SOUP_POWER_ID')))
     await power.send(content=message_content)
 
 
-async def post_to_apex(message_content: str) -> None:
+async def post_to_apex_server(message_content: str) -> None:
     """
     Posts an Apex clip from my archive server's game clips channels
     to the Apex game clips channel.
@@ -128,7 +151,7 @@ async def post_to_apex(message_content: str) -> None:
     message_content : str
         the message to be transferred
     """
-    power = client.get_channel(int(os.getenv('APEX_LES_POV_ID')))
+    power = client.get_channel(int(os.getenv('APEX_POV_ID')))
     await power.send(content=message_content)
 
 
@@ -148,30 +171,48 @@ async def respond_to_user(message: Message, response: str) -> None:
                 .send(content=response)
 
 
-async def remind_about_rankdle() -> None:
-    # https://stackoverflow.com/a/63388134
 
-    content = f'Rankdle has reset! https://rankdle.com/'
-    await client.get_channel(int(os.getenv('DROPPED_ID'))) \
-                .send(content=content)
-    await client.get_channel(int(os.getenv('APEX_LES_GEN_ID'))) \
-                .send(content=content)
-    
 
-async def remind_about_pokedle() -> None:
+##############################################################
+#######                                                #######
+###                    -dle reminders                      ###
+#######                                                #######
+##############################################################
 
-    content = f'Pokedle has reset! https://pokedle.io/'
-    await client.get_channel(int(os.getenv('APEX_LES_GEN_ID'))) \
-                .send(content=content)
-    
+# https://stackoverflow.com/a/63388134
 
 async def remind_about_gamedle() -> None:
-
     content = f'Gamedle has reset! https://www.gamedle.wtf/guess#'
-    await client.get_channel(int(os.getenv('APEX_LES_GEN_ID'))) \
+    await client.get_channel(int(os.getenv('APEX_GAMEDLE_ID'))) \
+                .send(content=content)
+
+async def remind_about_pokedle() -> None:
+    content = f'Pokedle has reset! https://pokedle.io/'
+    await client.get_channel(int(os.getenv('APEX_POKEDLE_ID'))) \
+                .send(content=content)
+
+async def remind_about_smashdle() -> None:
+    content = f'Smashdle has reset! https://smashdle.net/classic'
+    await client.get_channel(int(os.getenv('APEX_SMASHDLE_ID'))) \
+                .send(content=content)
+    
+async def remind_about_rankdle() -> None:
+    content = f'Rankdle has reset! https://rankdle.com/'
+    await client.get_channel(int(os.getenv('APEX_RANKDLE_ID'))) \
+                .send(content=content)
+
+async def remind_about_wordle() -> None:
+    content = \
+        f'Wordle has reset! https://www.nytimes.com/games/wordle/index.html'
+    await client.get_channel(int(os.getenv('APEX_WORDLE_ID'))) \
                 .send(content=content)
     
 
 
+##############################################################
+#######                                                #######
+###                       run bot                          ###
+#######                                                #######
+##############################################################
 
 client.run(os.getenv('BOT_TOKEN'))
