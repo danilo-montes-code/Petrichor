@@ -27,7 +27,7 @@ async def on_ready() -> None:
 
     # remind about gamedle at 9p EST
     scheduler.add_job(remind_about_gamedle, 
-                      CronTrigger(hour=9 + 12))
+                      CronTrigger(hour=10 + 12))
     
     # remind about pokedle at 7p EST
     scheduler.add_job(remind_about_pokedle, 
