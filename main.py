@@ -199,7 +199,7 @@ async def remind_about_wordle() -> None:
                 .send(content=content)
 
 async def remind_about_bandle() -> None:
-    content = f'Wordle has reset! https://bandle.app/'
+    content = f'Bandle has reset! https://bandle.app/'
     await client.get_channel(int(os.getenv('APEX_BANDLE_ID'))) \
                 .send(content=content)
 
