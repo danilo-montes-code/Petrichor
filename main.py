@@ -25,18 +25,6 @@ async def on_ready() -> None:
 
     scheduler = AsyncIOScheduler()
 
-    # remind about gamedle at 9p EST
-    scheduler.add_job(remind_about_gamedle, 
-                      CronTrigger(hour=10 + 12))
-    
-    # remind about pokedle at 7p EST
-    scheduler.add_job(remind_about_pokedle, 
-                      CronTrigger(hour=7 + 12))
-    
-    # remind about smashdle at 1a EST
-    scheduler.add_job(remind_about_smashdle, 
-                      CronTrigger(hour=1))
-
     # remind about rankdle at 9p EST
     scheduler.add_job(remind_about_rankdle, 
                       CronTrigger(hour=9 + 12))
@@ -44,6 +32,22 @@ async def on_ready() -> None:
     # remind about wordle at 12a EST
     scheduler.add_job(remind_about_wordle, 
                       CronTrigger(hour=0))
+    
+    # remind about bandle at 12a EST
+    scheduler.add_job(remind_about_bandle, 
+                      CronTrigger(hour=0))
+
+    # remind about pokedle at 7p EST
+    scheduler.add_job(remind_about_pokedle, 
+                      CronTrigger(hour=7 + 12))
+    
+    # remind about gamedle at 9p EST
+    scheduler.add_job(remind_about_gamedle, 
+                      CronTrigger(hour=10 + 12))
+    
+    # remind about smashdle at 1a EST
+    scheduler.add_job(remind_about_smashdle, 
+                      CronTrigger(hour=1))
 
     scheduler.start()
 
@@ -79,6 +83,7 @@ async def on_message(message: Message) -> None:
 
     # funny crazy
     await crazy_check(message)
+
 
 
 
@@ -118,6 +123,7 @@ async def crazy_check(message: Message):
         else:
             await respond_to_user(message, 'a rubber room with rats.')
             return
+
 
 
 
@@ -181,23 +187,8 @@ async def respond_to_user(message: Message, response: str) -> None:
 
 # https://stackoverflow.com/a/63388134
 
-async def remind_about_gamedle() -> None:
-    content = f'Gamedle has reset! https://www.gamedle.wtf/guess#'
-    await client.get_channel(int(os.getenv('APEX_GAMEDLE_ID'))) \
-                .send(content=content)
-
-async def remind_about_pokedle() -> None:
-    content = f'Pokedle has reset! https://pokedle.io/'
-    await client.get_channel(int(os.getenv('APEX_POKEDLE_ID'))) \
-                .send(content=content)
-
-async def remind_about_smashdle() -> None:
-    content = f'Smashdle has reset! https://smashdle.net/classic'
-    await client.get_channel(int(os.getenv('APEX_SMASHDLE_ID'))) \
-                .send(content=content)
-    
 async def remind_about_rankdle() -> None:
-    content = f'Rankdle has reset! https://rankdle.com/'
+    content = f'Rankdle has reset! https://rankdle.com/games/apex'
     await client.get_channel(int(os.getenv('APEX_RANKDLE_ID'))) \
                 .send(content=content)
 
@@ -206,7 +197,28 @@ async def remind_about_wordle() -> None:
         f'Wordle has reset! https://www.nytimes.com/games/wordle/index.html'
     await client.get_channel(int(os.getenv('APEX_WORDLE_ID'))) \
                 .send(content=content)
-    
+
+async def remind_about_bandle() -> None:
+    content = f'Wordle has reset! https://bandle.app/'
+    await client.get_channel(int(os.getenv('APEX_BANDLE_ID'))) \
+                .send(content=content)
+
+async def remind_about_pokedle() -> None:
+    content = f'Pokedle has reset! https://pokedle.io/'
+    await client.get_channel(int(os.getenv('APEX_POKEDLE_ID'))) \
+                .send(content=content)
+
+async def remind_about_gamedle() -> None:
+    content = f'Gamedle has reset! https://www.gamedle.wtf/guess#'
+    await client.get_channel(int(os.getenv('APEX_GAMEDLE_ID'))) \
+                .send(content=content)
+
+async def remind_about_smashdle() -> None:
+    content = f'Smashdle has reset! https://smashdle.net/classic'
+    await client.get_channel(int(os.getenv('APEX_SMASHDLE_ID'))) \
+                .send(content=content)
+
+
 
 
 ##############################################################
