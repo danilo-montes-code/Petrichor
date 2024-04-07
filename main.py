@@ -76,10 +76,8 @@ async def on_message(message: Message) -> None:
        'clips' in message.channel.name):
         
         await post_to_power(message.content)
-        if 'apex' in message.channel.name:
+        if '0' in message.channel.name:
             await post_to_apex_server(message.content)
-            
-        return
 
     # funny crazy
     await crazy_check(message)
