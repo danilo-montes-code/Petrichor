@@ -79,9 +79,8 @@ async def on_message(message: Message) -> None:
         if '0' in message.channel.name:
             await post_to_apex_server(message.content)
 
-    # funny crazy
     await crazy_check(message)
-
+    await igh_bro(message)
 
 
 
@@ -122,6 +121,15 @@ async def crazy_check(message: Message):
             await respond_to_user(message, 'a rubber room with rats.')
             return
 
+
+
+async def igh_bro(message: Message):
+
+    if message.channel.id != os.getenv('APEX_GAME_UPDATES'):
+        return
+
+    await respond_to_user(message=message, response='igh bro')
+    return
 
 
 
