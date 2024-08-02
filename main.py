@@ -125,7 +125,7 @@ async def crazy_check(message: Message):
 
 async def igh_bro(message: Message):
 
-    if message.channel.id != os.getenv('APEX_GAME_UPDATES'):
+    if message.channel.id != int(os.getenv('APEX_GAME_UPDATES')):
         return
 
     await respond_to_user(message=message, response='igh bro')
