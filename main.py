@@ -75,9 +75,9 @@ async def on_message(message: Message) -> None:
     if (message.guild.id == int(os.getenv('FANTA_ID')) and 
        'clips' in message.channel.name):
         
-        await post_to_power(message.content)
-        if '0' in message.channel.name:
-            await post_to_apex_server(message.content)
+        await post_to_apex_server(message.content)
+        # if '0' in message.channel.name:
+            # await post_to_power(message.content)
 
     await crazy_check(message)
     await igh_bro(message)
