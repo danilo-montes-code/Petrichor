@@ -3,7 +3,7 @@ from apscheduler.triggers.cron import CronTrigger
 import discord
 from discord import Message
 
-import os
+import os, random
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -81,6 +81,7 @@ async def on_message(message: Message) -> None:
 
     await crazy_check(message)
     await igh_bro(message)
+    await embed_evaluation(message)
 
 
 
@@ -122,13 +123,36 @@ async def crazy_check(message: Message):
             return
 
 
-
 async def igh_bro(message: Message):
 
     if message.channel.id != int(os.getenv('APEX_GAME_UPDATES')):
         return
 
     await respond_to_user(message=message, response='igh bro')
+    return
+
+
+embed_links = [
+    # failure
+    'https://tenor.com/view/epic-embed-fail-ryan-gosling-cereal-embed-failure-laugh-at-this-user-gif-20627924',
+    'https://tenor.com/view/epic-embed-fail-embed-fail-embed-discord-embed-gif-embed-gif-21924703',
+    'https://tenor.com/view/embed-perms-no-image-perms-epic-embed-fail-laughing-emoji-gif-25041403',
+    'https://tenor.com/view/epic-embed-fail-embed-embedfail-get-it-fail-embed-gif-22402006',
+
+    'https://tenor.com/view/embed-fail-embed-fail-intentional-intentional-embed-gif-17355838859230793055',
+
+    # sucess
+    'https://tenor.com/view/epic-embed-success-gif-25677703',
+    'https://tenor.com/view/catboy-cereal-embed-success-ryan-gosling-gif-21943489',
+    'https://tenor.com/view/epic-embed-success-epic-embed-fail-gif-21239189',
+    'https://tenor.com/view/embed-fail-embed-gif-24490045'
+]
+async def embed_evaluation(message: Message):
+    
+    await respond_to_user(
+        message=message, 
+        response=random.choice(embed_links)
+    )
     return
 
 
