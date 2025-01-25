@@ -86,7 +86,7 @@ async def roll_the_ping(interaction : Interaction):
 
     for member in interaction.guild.members:
 
-        role_names : list[str] = [role.name for role in member.roles]
+        role_names : list[str] = [role.name.lower() for role in member.roles]
 
         if "has no interesting roles" in role_names or "bot schmuck" in role_names:
             continue
