@@ -77,10 +77,10 @@ async def on_message(message: Message) -> None:
 ##############################################################
 
 @tree.command(
-    name="rtd",
+    name="rtp",
     description="Chooses a random active member to ping :D"
 )
-async def roll_the_dice(interaction : Interaction):
+async def roll_the_ping(interaction : Interaction):
 
     role_havers : list[Member] = []
 
