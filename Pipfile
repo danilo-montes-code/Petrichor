@@ -4,8 +4,8 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-"discord.py" = "*"
 apscheduler = "*"
+"discord.py" = "*"
 
 [dev-packages]
 
