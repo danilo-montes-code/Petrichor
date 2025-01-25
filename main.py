@@ -1,13 +1,21 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 import discord
-from discord import Message
+from discord import app_commands
+from discord import (
+    Message,
+    Interaction,
+    Member
+)
+
 
 import os, random
 
 intents = discord.Intents.default()
 intents.message_content = True
+intents.members = True
 client = discord.Client(intents=intents)
+tree = app_commands.CommandTree(client=client)
 
 
 
@@ -23,35 +31,12 @@ async def on_ready() -> None:
     Sets up the bot when the client has connected.
     """
 
-    scheduler = AsyncIOScheduler()
+    # we don't really use these anymore
+    # setup_dle_reminders()
 
-    # remind about rankdle at 9p EST
-    scheduler.add_job(remind_about_rankdle, 
-                      CronTrigger(hour=9 + 12))
+    await tree.sync()
 
-    # remind about wordle at 12a EST
-    scheduler.add_job(remind_about_wordle, 
-                      CronTrigger(hour=0))
-    
-    # remind about bandle at 12a EST
-    scheduler.add_job(remind_about_bandle, 
-                      CronTrigger(hour=0))
-
-    # remind about pokedle at 7p EST
-    scheduler.add_job(remind_about_pokedle, 
-                      CronTrigger(hour=7 + 12))
-    
-    # remind about gamedle at 9p EST
-    scheduler.add_job(remind_about_gamedle, 
-                      CronTrigger(hour=10 + 12))
-    
-    # remind about smashdle at 1a EST
-    scheduler.add_job(remind_about_smashdle, 
-                      CronTrigger(hour=1))
-
-    scheduler.start()
-
-    print(f'User {client.user} logged in')
+    print(f'User {client.user} online')
 
 
 @client.event
@@ -82,6 +67,37 @@ async def on_message(message: Message) -> None:
     await crazy_check(message)
     await igh_bro(message)
     await embed_evaluation(message)
+
+
+
+##############################################################
+#######                                                #######
+###                    slash commands                      ###
+#######                                                #######
+##############################################################
+
+@tree.command(
+    name="rtd",
+    description="Chooses a random active member to ping :D"
+)
+async def roll_the_dice(interaction : Interaction):
+
+    role_havers : list[Member] = []
+
+    for member in interaction.guild.members:
+
+        role_names : list[str] = [role.name for role in member.roles]
+
+        if "has no interesting roles" in role_names or "bot schmuck" in role_names:
+            continue
+
+        role_havers.append(member)
+
+    ping_victim = random.choice(role_havers)
+
+    await interaction.response.send_message(
+        f"By fate, {interaction.user.display_name} has pinged {ping_victim.mention}. Congrats!"
+    )
 
 
 
@@ -148,6 +164,19 @@ embed_links = [
     'https://tenor.com/view/embed-fail-embed-gif-24490045'
 ]
 async def embed_evaluation(message: Message):
+
+    # only reply to embeds bc like that's the whole point
+    if not message.embeds:
+        return
+
+    # dont run this in the clips channel bc that would be too much spam
+    if message.channel.id == int(os.getenv('APEX_POV_ID')):
+        return
+
+    # only run this 10% of the time because it would get annoying real quick
+    # more than it already will be
+    if random.randint(0, 9) not in (3, 6, 9):
+        return
     
     await respond_to_user(
         message=message, 
@@ -216,6 +245,35 @@ async def respond_to_user(message: Message, response: str) -> None:
 ##############################################################
 
 # https://stackoverflow.com/a/63388134
+
+async def setup_dle_reminders() -> None:
+    scheduler = AsyncIOScheduler()
+
+    # remind about rankdle at 9p EST
+    scheduler.add_job(remind_about_rankdle, 
+                      CronTrigger(hour=9 + 12))
+
+    # remind about wordle at 12a EST
+    scheduler.add_job(remind_about_wordle, 
+                      CronTrigger(hour=0))
+
+    # remind about bandle at 12a EST
+    scheduler.add_job(remind_about_bandle, 
+                      CronTrigger(hour=0))
+
+    # remind about pokedle at 7p EST
+    scheduler.add_job(remind_about_pokedle, 
+                      CronTrigger(hour=7 + 12))
+
+    # remind about gamedle at 9p EST
+    scheduler.add_job(remind_about_gamedle, 
+                      CronTrigger(hour=10 + 12))
+
+    # remind about smashdle at 1a EST
+    scheduler.add_job(remind_about_smashdle, 
+                      CronTrigger(hour=1))
+
+    scheduler.start()
 
 async def remind_about_rankdle() -> None:
     content = f'Rankdle has reset! https://rankdle.com/games/apex'
