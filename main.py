@@ -1,21 +1,22 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 import discord
-from discord import app_commands
+from discord.ext import commands
 from discord import (
     Message,
     Interaction,
     Member
 )
-
+from discord.ext.commands import Context
 
 import os, random
+
+
 
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
-client = discord.Client(intents=intents)
-tree = app_commands.CommandTree(client=client)
+bot = commands.Bot(command_prefix='.', intents=intents)
 
 
 
@@ -25,7 +26,7 @@ tree = app_commands.CommandTree(client=client)
 #######                                                #######
 ##############################################################
 
-@client.event
+@bot.event
 async def on_ready() -> None:
     """
     Sets up the bot when the client has connected.
@@ -34,12 +35,14 @@ async def on_ready() -> None:
     # we don't really use these anymore
     # setup_dle_reminders()
 
-    await tree.sync()
+    # TODO remove from comments once hybrid command is created for syncing
+    # await bot.tree.sync()
+    # await bot.tree.sync(guild = discord.Object(id=int(os.getenv('FANTA_ID'))))
 
-    print(f'User {client.user} online')
+    print(f'User {bot.user} online')
 
 
-@client.event
+@bot.event
 async def on_message(message: Message) -> None:
     """
     Responds to messages sent in servers that the bot is in.
@@ -51,9 +54,10 @@ async def on_message(message: Message) -> None:
     """
 
     # prevents recursive call
-    if message.author == client.user:
+    if message.author == bot.user:
         return
 
+    await bot.process_commands(message)
 
     # sends messages from clips channels in archive server
     # to another server
@@ -72,13 +76,13 @@ async def on_message(message: Message) -> None:
 
 ##############################################################
 #######                                                #######
-###                    slash commands                      ###
+###                 public slash commands                  ###
 #######                                                #######
 ##############################################################
 
-@tree.command(
-    name="rtp",
-    description="Chooses a random active member to ping :D"
+@bot.tree.command(
+    name='rtp',
+    description='Chooses a random active member to ping :D'
 )
 async def roll_the_ping(interaction : Interaction):
 
@@ -89,15 +93,61 @@ async def roll_the_ping(interaction : Interaction):
         role_names : list[str] = [role.name.lower() for role in member.roles]
 
         if "has no interesting roles" in role_names or "bot schmuck" in role_names:
+            # print(f'{member.display_name} is excluded')
             continue
 
         role_havers.append(member)
+
+    # print([user.name for user in role_havers])
 
     ping_victim = random.choice(role_havers)
 
     await interaction.response.send_message(
         f"By fate, {interaction.user.display_name} has pinged {ping_victim.mention}. Congrats!"
     )
+
+
+@bot.tree.command(
+    name='pingus',
+    description='Gets the latency of the bot'
+)
+async def pingus(interaction : Interaction):
+    '''
+    Gets the latency of the bot.
+    '''
+
+    await interaction.response.send_message(content=bot.latency)
+
+
+
+##############################################################
+#######                                                #######
+###                  owner slash commands                  ###
+#######                                                #######
+##############################################################
+
+
+@bot.tree.command(
+    name = 'shutdown',
+    description = 'Shuts down the bot',
+    guild = discord.Object(id=int(os.getenv('FANTA_ID')))
+)
+async def shutdown(interaction : Interaction):
+    print(f'{bot.user} shutting down...')
+    await interaction.response.send_message('Shutting down...')
+    await bot.close()
+
+
+# TODO make into hybrid command, possibly with arg to do global or just fanta
+@bot.tree.command(
+    name = 'sync',
+    description = 'Syncs the commands on the command tree',
+    guild = discord.Object(int(os.getenv('FANTA_ID')))
+)
+async def sync(interaction : Interaction):
+    await bot.tree.sync()
+    await bot.tree.sync(guild = discord.Object(id=int(os.getenv('FANTA_ID'))))
+    await interaction.response.send_message('Command tree synced.')
 
 
 
@@ -202,7 +252,7 @@ async def post_to_power(message_content: str) -> None:
     message_content : str
         the message to be transferred
     """
-    power = client.get_channel(int(os.getenv('SOUP_POWER_ID')))
+    power = bot.get_channel(int(os.getenv('SOUP_POWER_ID')))
     await power.send(content=message_content)
 
 
@@ -216,7 +266,7 @@ async def post_to_apex_server(message_content: str) -> None:
     message_content : str
         the message to be transferred
     """
-    power = client.get_channel(int(os.getenv('APEX_POV_ID')))
+    power = bot.get_channel(int(os.getenv('APEX_POV_ID')))
     await power.send(content=message_content)
 
 
@@ -232,9 +282,8 @@ async def respond_to_user(message: Message, response: str) -> None:
     response : str
         the desired response to the user from the bot
     """
-    await client.get_channel(message.channel.id) \
+    await bot.get_channel(message.channel.id) \
                 .send(content=response)
-
 
 
 
@@ -277,35 +326,34 @@ async def setup_dle_reminders() -> None:
 
 async def remind_about_rankdle() -> None:
     content = f'Rankdle has reset! https://rankdle.com/games/apex'
-    await client.get_channel(int(os.getenv('APEX_RANKDLE_ID'))) \
+    await bot.get_channel(int(os.getenv('APEX_RANKDLE_ID'))) \
                 .send(content=content)
 
 async def remind_about_wordle() -> None:
     content = \
         f'Wordle has reset! https://www.nytimes.com/games/wordle/index.html'
-    await client.get_channel(int(os.getenv('APEX_WORDLE_ID'))) \
+    await bot.get_channel(int(os.getenv('APEX_WORDLE_ID'))) \
                 .send(content=content)
 
 async def remind_about_bandle() -> None:
     content = f'Bandle has reset! https://bandle.app/'
-    await client.get_channel(int(os.getenv('APEX_BANDLE_ID'))) \
+    await bot.get_channel(int(os.getenv('APEX_BANDLE_ID'))) \
                 .send(content=content)
 
 async def remind_about_pokedle() -> None:
     content = f'Pokedle has reset! https://pokedle.io/'
-    await client.get_channel(int(os.getenv('APEX_POKEDLE_ID'))) \
+    await bot.get_channel(int(os.getenv('APEX_POKEDLE_ID'))) \
                 .send(content=content)
 
 async def remind_about_gamedle() -> None:
     content = f'Gamedle has reset! https://www.gamedle.wtf/guess#'
-    await client.get_channel(int(os.getenv('APEX_GAMEDLE_ID'))) \
+    await bot.get_channel(int(os.getenv('APEX_GAMEDLE_ID'))) \
                 .send(content=content)
 
 async def remind_about_smashdle() -> None:
     content = f'Smashdle has reset! https://smashdle.net/classic'
-    await client.get_channel(int(os.getenv('APEX_SMASHDLE_ID'))) \
+    await bot.get_channel(int(os.getenv('APEX_SMASHDLE_ID'))) \
                 .send(content=content)
-
 
 
 
@@ -315,4 +363,4 @@ async def remind_about_smashdle() -> None:
 #######                                                #######
 ##############################################################
 
-client.run(os.getenv('BOT_TOKEN'))
+bot.run(os.getenv('BOT_TOKEN'))
