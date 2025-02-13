@@ -10,13 +10,13 @@ from discord import (
 from discord.ext.commands import Context
 
 import os, random
-
+import typing
 
 
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
-bot = commands.Bot(command_prefix='.', intents=intents)
+bot = commands.Bot(command_prefix='?', intents=intents)
 
 
 
@@ -138,16 +138,18 @@ async def shutdown(interaction : Interaction):
     await bot.close()
 
 
-# TODO make into hybrid command, possibly with arg to do global or just fanta
-@bot.tree.command(
+@bot.hybrid_command(
     name = 'sync',
     description = 'Syncs the commands on the command tree',
     guild = discord.Object(int(os.getenv('FANTA_ID')))
 )
-async def sync(interaction : Interaction):
-    await bot.tree.sync()
-    await bot.tree.sync(guild = discord.Object(id=int(os.getenv('FANTA_ID'))))
-    await interaction.response.send_message('Command tree synced.')
+async def sync(ctx : Context, scope : typing.Literal['fanta', 'all'] = 'all'):
+    if scope == 'fanta':
+        await bot.tree.sync(guild = discord.Object(id=int(os.getenv('FANTA_ID'))))
+        await ctx.send('Admin command tree synced.')
+    else: 
+        await bot.tree.sync()
+        await ctx.send('Command tree synced.')
 
 
 
