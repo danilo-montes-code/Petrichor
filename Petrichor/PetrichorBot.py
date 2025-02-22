@@ -9,6 +9,8 @@ from discord.ext import commands
 from util.printing import print_petrichor_msg
 from Petrichor.cogs import EXTENSIONS
 
+import os
+
 from util.db_connection_manager import DatabaseConnectionManager
 
 
@@ -41,7 +43,7 @@ class PetrichorBot(commands.Bot):
         intents.message_content = True
         intents.members = True
         super().__init__(
-            command_prefix='?',
+            command_prefix=os.getenv('PREFIX'),
             intents=intents,
             *args, **kwargs
         )

@@ -68,6 +68,7 @@ class AdminCog(commands.Cog):
         name = 'sync',
         description = 'Syncs the commands on the command tree'
     )
+    @commands.is_owner()
     async def sync(
         self, 
         ctx : Context, 
