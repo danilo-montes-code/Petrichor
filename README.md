@@ -11,6 +11,6 @@ Petrichor is a mutlipurpose Discord Bot for my server with my friends.
 `/rtp` - "roll the ping", chooses a random active member and pings them
 `/pingus` - gets the latency of the bot
 
-#### Tutorials referenced
+#### Useful Documentation / References
 * https://docs.replit.com/tutorials/python/build-basic-discord-bot-python
 * https://dev.to/mannu/4slash-commands-in-discordpy-ofl
