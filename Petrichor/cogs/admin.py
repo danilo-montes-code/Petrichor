@@ -8,6 +8,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from util.printing import print_petrichor_msg, print_petrichor_error
+from util.casting import get_id
 
 import os
 from typing import Literal
@@ -89,10 +90,10 @@ class AdminCog(commands.Cog):
         """
 
         if scope == 'fanta':
-            await self.bot.tree.sync(guild = discord.Object(id=int(os.getenv('FANTA_ID'))))
+            await self.bot.tree.sync(guild = discord.Object(id=get_id('FANTA_ID')))
             await ctx.send('Admin server synced.')
         elif scope == 'kidnamedsoub':
-            await self.bot.tree.sync(guild = discord.Object(id=int(os.getenv('KNS_ID'))))
+            await self.bot.tree.sync(guild = discord.Object(id=get_id('KNS_ID')))
             await ctx.send('kidnamedsoub server synced.')
         else: 
             await self.bot.tree.sync()
@@ -119,6 +120,8 @@ class AdminCog(commands.Cog):
         
         Parameters
         ----------
+        interaction : Interaction
+            the interaction that evoked the command
         cog : Literal[str]
             the cog to reload
         """
@@ -151,5 +154,5 @@ async def setup(bot : commands.Bot) -> None:
     """
     await bot.add_cog(
         AdminCog(bot), 
-        guild=discord.Object(id=int(os.getenv('FANTA_ID')))
+        guild=discord.Object(id=get_id('FANTA_ID'))
     )

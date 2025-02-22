@@ -5,6 +5,8 @@ Contains the Cog that manages message reactions.
 
 from discord.ext import commands
 
+from util.casting import get_id
+
 import os, random
 
 from discord import Message
@@ -67,7 +69,7 @@ class MessageReactsCog(commands.Cog):
 
         # sends messages from clips channels in archive server
         # to another server
-        if (message.guild.id == int(os.getenv('FANTA_ID')) and 
+        if (message.guild.id == get_id('FANTA_ID') and 
            'clips' in message.channel.name):
 
             await self.post_to_pov(message.content)
@@ -133,7 +135,7 @@ class MessageReactsCog(commands.Cog):
             the message that was sent
         """
 
-        if message.channel.id != int(os.getenv('APEX_GAME_UPDATES')):
+        if message.channel.id != get_id('APEX_GAME_UPDATES'):
             return
 
         await self.respond_to_user(message=message, response='igh bro')
@@ -155,7 +157,7 @@ class MessageReactsCog(commands.Cog):
             return
 
         # dont run this in the clips channel bc that would be too much spam
-        if message.channel.id == int(os.getenv('APEX_POV_ID')):
+        if message.channel.id == get_id('APEX_POV_ID'):
             return
 
         # only run this 10% of the time because it would get annoying real quick
@@ -187,7 +189,7 @@ class MessageReactsCog(commands.Cog):
         message_content : str
             the message to be transferred
         """
-        power = self.bot.get_channel(int(os.getenv('SOUP_POWER_ID')))
+        power = self.bot.get_channel(get_id('SOUP_POWER_ID'))
         await power.send(content=message_content)
 
 
@@ -201,7 +203,7 @@ class MessageReactsCog(commands.Cog):
         message_content : str
             the message to be transferred
         """
-        power = self.bot.get_channel(int(os.getenv('APEX_POV_ID')))
+        power = self.bot.get_channel(get_id('APEX_POV_ID'))
         await power.send(content=message_content)
 
 

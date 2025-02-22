@@ -8,6 +8,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 
 from util.printing import print_petrichor_msg
+from util.casting import get_id
 
 import os
 
@@ -84,7 +85,7 @@ class RemindersCog(commands.Cog):
         Sends a reminder about rankdle refresh.
         """
         content = f'Rankdle has reset! https://rankdle.com/games/apex'
-        await self.bot.get_channel(int(os.getenv('APEX_RANKDLE_ID'))) \
+        await self.bot.get_channel(get_id('APEX_RANKDLE_ID')) \
                       .send(content=content)
 
 
@@ -94,7 +95,7 @@ class RemindersCog(commands.Cog):
         """
         content = \
             f'Wordle has reset! https://www.nytimes.com/games/wordle/index.html'
-        await self.bot.get_channel(int(os.getenv('APEX_WORDLE_ID'))) \
+        await self.bot.get_channel(get_id('APEX_WORDLE_ID')) \
                       .send(content=content)
 
 
@@ -103,7 +104,7 @@ class RemindersCog(commands.Cog):
         Sends a reminder about bandle refresh.
         """
         content = f'Bandle has reset! https://bandle.app/'
-        await self.bot.get_channel(int(os.getenv('APEX_BANDLE_ID'))) \
+        await self.bot.get_channel(get_id('APEX_BANDLE_ID')) \
                       .send(content=content)
 
 
@@ -112,7 +113,7 @@ class RemindersCog(commands.Cog):
         Sends a reminder about pokedle refresh.
         """
         content = f'Pokedle has reset! https://pokedle.io/'
-        await self.bot.get_channel(int(os.getenv('APEX_POKEDLE_ID'))) \
+        await self.bot.get_channel(get_id('APEX_POKEDLE_ID')) \
                       .send(content=content)
 
 
@@ -121,7 +122,7 @@ class RemindersCog(commands.Cog):
         Sends a reminder about gamedle refresh.
         """
         content = f'Gamedle has reset! https://www.gamedle.wtf/guess#'
-        await self.bot.get_channel(int(os.getenv('APEX_GAMEDLE_ID'))) \
+        await self.bot.get_channel(get_id('APEX_GAMEDLE_ID')) \
                       .send(content=content)
 
 
@@ -130,7 +131,7 @@ class RemindersCog(commands.Cog):
         Sends a reminder about smashdle refresh.
         """
         content = f'Smashdle has reset! https://smashdle.net/classic'
-        await self.bot.get_channel(int(os.getenv('APEX_SMASHDLE_ID'))) \
+        await self.bot.get_channel(get_id('APEX_SMASHDLE_ID')) \
                       .send(content=content)
 
 

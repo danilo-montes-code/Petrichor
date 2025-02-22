@@ -6,12 +6,20 @@ Contains the Cog that holds commands that perform actions.
 from discord import app_commands
 from discord.ext import commands
 
+from util.printing import print_petrichor_error
+from util.casting import get_id
+
 import random
 
 from discord import (
     Interaction,
-    Member
+    Member,
+    Forbidden,
+    HTTPException
 )
+from discord import TextChannel
+
+
 
 class ActionsCog(commands.Cog):
     """
@@ -40,6 +48,15 @@ class ActionsCog(commands.Cog):
         description='Chooses a random active member to ping :D'
     )
     async def roll_the_ping(self, interaction : Interaction):
+        """
+        Picks a random active member and pings them. Makes a record of the ping
+        as well.
+
+        Parameters
+        ----------
+        interaction : Interaction
+            the interaction that evoked the command
+        """
 
         role_havers : list[Member] = []
 
@@ -66,10 +83,88 @@ class ActionsCog(commands.Cog):
     async def pingus(self, interaction : Interaction):
         '''
         Gets the latency of the bot.
+        
+        Parameters
+        ----------
+        interaction : Interaction
+            the interaction that evoked the command
         '''
 
         await interaction.response.send_message(content=self.bot.latency)
 
+
+    @app_commands.command(
+        name='last-clip',
+        description='Gets the link of the user\'s most recent posted clip'
+    )
+    async def last_clip(
+        self, 
+        interaction : Interaction, 
+        game : str = None,
+        limit : int = 100
+    ) -> None:
+        """
+        Gets the link of the last clip that the user posted in the POV channel.
+        
+        Parameters
+        ----------
+        interaction : Interaction
+            the interaction that evoked the command
+        game : str, default = None
+            the name of the game to search for the last posted clip of
+        limit : int, default = 100
+            the maximum number of messages to search through
+        """
+        
+        pov_channel : TextChannel = self.bot.get_channel(get_id('APEX_POV_ID'))
+
+        try:
+            async for message in pov_channel.history(limit=limit):
+
+                if not message.embeds: continue
+
+                # since I send game clips through this bot, check for messages
+                # from both the both and myself if I use this command
+                if (
+                    (interaction.user.id == get_id('MY_ID') and
+                    message.author.id == get_id('PETRICHOR_ID')) 
+                    or message.author == interaction.user
+                    ):
+                    if game:
+                        if game.replace(' ', '-') not in message.embeds[-1].url:
+                            continue
+
+                        await interaction.response.send_message(
+                            content= \
+                            f'Your last game clip was here: {message.jump_url}'
+                        )
+
+                    else:
+                        await interaction.response.send_message(
+                            content= \
+                            f'Your last game clip was here: {message.jump_url}'
+                        )
+                        
+                    return
+                
+            await interaction.response.send_message(
+                content= \
+                (
+                    'No recent game clips found. You may want to search '
+                    'again with a higher `limit` option.'
+                )
+            )
+
+        except Forbidden:
+            print_petrichor_error('lacking perms to get channel history')
+        except HTTPException as err:
+            print_petrichor_error('Request failed')
+            print_petrichor_error('Response:', err.response)
+            print_petrichor_error('Text:', err.text)
+            print_petrichor_error('Status:', err.status)
+        except Exception as err:
+            print_petrichor_error('other exception raised:', err)
+    
 
 
 async def setup(bot : commands.Bot) -> None:
