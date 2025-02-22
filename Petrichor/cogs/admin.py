@@ -19,6 +19,7 @@ from discord.ext.commands import (
 )
 
 from discord import Interaction
+from discord.ext.commands import Context
 
 
 
@@ -63,13 +64,13 @@ class AdminCog(commands.Cog):
         await self.bot.close()
 
 
-    @app_commands.command(
+    @commands.command(
         name = 'sync',
         description = 'Syncs the commands on the command tree'
     )
     async def sync(
         self, 
-        interaction : Interaction, 
+        ctx : Context, 
         scope : Literal['fanta', 'kidnamedsoub', 'all'] = 'all'
     ) -> None:
         """
@@ -77,8 +78,8 @@ class AdminCog(commands.Cog):
 
         Parameters
         ----------
-        interaction : Interaction
-            the interaction that evoked the command
+        ctx : Context
+            the context in which the command was evoked
         scope : Literal['fanta', 'kidnamedsoub', 'all'], default = 'all'
             indicates whether to sync commands in all or a specific server  
             'fanta' - archive/admin server
@@ -88,13 +89,13 @@ class AdminCog(commands.Cog):
 
         if scope == 'fanta':
             await self.bot.tree.sync(guild = discord.Object(id=int(os.getenv('FANTA_ID'))))
-            await interaction.response.send_message('Admin server synced.')
+            await ctx.send('Admin server synced.')
         elif scope == 'kidnamedsoub':
             await self.bot.tree.sync(guild = discord.Object(id=int(os.getenv('KNS_ID'))))
-            await interaction.response.send_message('kidnamedsoub server synced.')
+            await ctx.send('kidnamedsoub server synced.')
         else: 
             await self.bot.tree.sync()
-            await interaction.response.send_message('Command tree synced on all servers.')
+            await ctx.send('Command tree synced on all servers.')
 
 
     @app_commands.command(
