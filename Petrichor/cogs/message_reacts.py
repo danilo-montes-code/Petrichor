@@ -34,25 +34,23 @@ class MessageReactsCog(commands.Cog):
         """
 
         self.bot = bot
-        self.embed_links = [
-            # failure
+        self.embed_fails = [
             'https://tenor.com/view/epic-embed-fail-ryan-gosling-cereal-embed-failure-laugh-at-this-user-gif-20627924',
             'https://tenor.com/view/epic-embed-fail-embed-fail-embed-discord-embed-gif-embed-gif-21924703',
             'https://tenor.com/view/embed-perms-no-image-perms-epic-embed-fail-laughing-emoji-gif-25041403',
-            'https://tenor.com/view/epic-embed-fail-embed-embedfail-get-it-fail-embed-gif-22402006',
-
-            # mid ground
-            'https://tenor.com/view/embed-fail-embed-fail-intentional-intentional-embed-gif-17355838859230793055',
-
-            # success
+            'https://tenor.com/view/epic-embed-fail-embed-embedfail-get-it-fail-embed-gif-22402006'
+        ]
+        # mid ground
+        # 'https://tenor.com/view/embed-fail-embed-fail-intentional-intentional-embed-gif-17355838859230793055',
+        self.embed_successes = [
             'https://tenor.com/view/epic-embed-success-gif-25677703',
             'https://tenor.com/view/catboy-cereal-embed-success-ryan-gosling-gif-21943489',
             'https://tenor.com/view/epic-embed-success-epic-embed-fail-gif-21239189',
             'https://tenor.com/view/embed-fail-embed-gif-24490045'
         ]
 
-    
-    
+
+
     @commands.Cog.listener()
     async def on_message(self, message : Message):
         """
@@ -152,9 +150,16 @@ class MessageReactsCog(commands.Cog):
             the message that was sent
         """
 
-        # only reply to embeds bc like that's the whole point
         if not message.embeds:
+            if 'https://' not in message.content:
+                return
+            
+            await self.respond_to_user(
+                message=message, 
+                response=random.choice(self.embed_fails)
+            )
             return
+
 
         # dont run this in the clips channel bc that would be too much spam
         if message.channel.id == get_id('APEX_POV_ID'):
@@ -162,12 +167,12 @@ class MessageReactsCog(commands.Cog):
 
         # only run this 10% of the time because it would get annoying real quick
         # more than it already will be
-        if random.randint(0, 9) not in (3, 6, 9):
+        if random.random() < (90 / 100):
             return
 
         await self.respond_to_user(
             message=message, 
-            response=random.choice(self.embed_links)
+            response=random.choice(self.embed_successes)
         )
         return
 

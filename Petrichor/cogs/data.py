@@ -4,6 +4,7 @@ Contains the Cog that holds commands whose main focus is CRUD operations.
 """
 
 from discord.ext import commands
+from discord import app_commands
 
 
 class DataCog(commands.Cog):

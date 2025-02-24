@@ -6,7 +6,7 @@ Used to hold data relating to the users of the bot.
 ```sql
 CREATE TABLE IF NOT EXISTS users(
     user_id VARCHAR(20) PRIMARY KEY,
-    name TEXT
+    username TEXT
 );
 ```
 

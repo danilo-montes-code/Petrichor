@@ -11,7 +11,7 @@ Petrichor is a mutlipurpose Discord Bot for my server with my friends.
 * `/rtp` - "roll the ping", chooses a random active member and pings them
 * `/pingus` - gets the latency of the bot
 * `/last-clip` - gets your most recently posted game clip
-    * `game` - **(optional)** the game to search for, doesn't check for game by default
+    * `game` - **(optional)** the game to search for, doesn't check for game by default (only works on clips sent as links)
     * `limit` - **(optional)** the maximum number of messages to search through, 100 by default
 
 ## Useful Documentation / References

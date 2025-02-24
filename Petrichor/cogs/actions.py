@@ -9,15 +9,18 @@ from discord.ext import commands
 from util.printing import print_petrichor_error
 from util.casting import get_id
 
-import random
+import random, pathlib
 
 from discord import (
     Interaction,
     Member,
+    Message,
     Forbidden,
     HTTPException
 )
 from discord import TextChannel
+
+from Petrichor.PetrichorBot import PetrichorBot
 
 
 
@@ -27,17 +30,17 @@ class ActionsCog(commands.Cog):
 
     Attributes
     ----------
-    bot : commands.Bot
+    bot : PetrichorBot
         bot that the commands belong to
     """
 
-    def __init__(self, bot : commands.Bot):
+    def __init__(self, bot : PetrichorBot):
         """
         Creates an instance of the ActionsCog class.
 
         Parameters
         ----------
-        bot : commands.Bot
+        bot : PetrichorBot
             bot that the commands belong to
         """
         self.bot = bot
@@ -74,6 +77,8 @@ class ActionsCog(commands.Cog):
         await interaction.response.send_message(
             f"By fate, {interaction.user.display_name} has pinged {ping_victim.mention}. Congrats!"
         )
+
+        # TODO add record to rtp table
 
 
     @app_commands.command(
@@ -112,6 +117,7 @@ class ActionsCog(commands.Cog):
             the interaction that evoked the command
         game : str, default = None
             the name of the game to search for the last posted clip of
+            (only works on clips sent as links)
         limit : int, default = 100
             the maximum number of messages to search through
         """
@@ -119,9 +125,17 @@ class ActionsCog(commands.Cog):
         pov_channel : TextChannel = self.bot.get_channel(get_id('APEX_POV_ID'))
 
         try:
+            message : Message
             async for message in pov_channel.history(limit=limit):
 
-                if not message.embeds: continue
+                if  (not message.embeds 
+                     and 'https://' not in message.content):
+                    if  (not message.attachments
+                         or not [file 
+                                 for file in message.attachments 
+                                 if pathlib.Path(file.filename).suffix != '.mp4']):
+                        continue
+                    
 
                 # since I send game clips through this bot, check for messages
                 # from both the both and myself if I use this command
@@ -131,8 +145,9 @@ class ActionsCog(commands.Cog):
                     or message.author == interaction.user
                     ):
                     if game:
-                        if game.replace(' ', '-') not in message.embeds[-1].url:
-                            continue
+                        if (not message.embeds 
+                            or game.replace(' ', '-') not in message.embeds[-1].url):
+                                continue
 
                         await interaction.response.send_message(
                             content= \
