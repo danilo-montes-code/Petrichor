@@ -7,7 +7,7 @@ from discord.ext import commands
 
 from util.casting import get_id
 
-import os, random
+import random, asyncio
 
 from discord import Message
 
@@ -149,6 +149,12 @@ class MessageReactsCog(commands.Cog):
         message : Message
             the message that was sent
         """
+
+        # re-fetch the message after a short delay to ensure embeds are
+        # properly detected before evaluation
+        await asyncio.sleep(0.5)
+        message = await self.bot.get_channel(message.channel.id) \
+                                .fetch_message(message.id)
 
         if not message.embeds:
             if 'https://' not in message.content:

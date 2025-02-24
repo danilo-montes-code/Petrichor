@@ -10,7 +10,6 @@ from discord.ext import commands
 from util.printing import print_petrichor_msg, print_petrichor_error
 from util.casting import get_id
 
-import os
 from typing import Literal
 from discord.ext.commands import (
     ExtensionNotLoaded,
@@ -110,7 +109,8 @@ class AdminCog(commands.Cog):
         cog : Literal[
             'actions',
             'admin',
-            'data', 
+            'data',
+            'dev_commands',
             'message_reacts',
             # 'reminders'
         ]

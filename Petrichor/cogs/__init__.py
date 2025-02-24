@@ -1,7 +1,8 @@
 from pkgutil import iter_modules
 
 EXCLUDED_EXTENSIONS = [
-    'reminders'
+    'reminders',
+    'sample'
 ]
 
 EXTENSIONS = [
