@@ -7,9 +7,13 @@ from discord.ext import commands
 
 from util.casting import get_id
 
-import random, asyncio
+import random, time
 
-from discord import Message
+from discord import (
+    Message, 
+    Member
+)
+from Petrichor.PetrichorBot import PetrichorBot
 
 
 
@@ -19,17 +23,17 @@ class MessageReactsCog(commands.Cog):
 
     Attributes
     ----------
-    bot : commands.Bot
+    bot : PetrichorBot
         bot that the commands belong to
     """
 
-    def __init__(self, bot : commands.Bot):
+    def __init__(self, bot : PetrichorBot):
         """
         Creates an instance of the MessageReactsCog class.
         
         Parameters
         ----------
-        bot : commands.Bot
+        bot : PetrichorBot
             bot that the commands belong to
         """
 
@@ -77,6 +81,20 @@ class MessageReactsCog(commands.Cog):
         await self.embed_evaluation(message)
 
         await self.bot.process_commands(message)
+
+
+    @commands.Cog.listener()
+    async def on_member_join(self, member : Member) -> None:
+        if member.bot:
+            return
+        
+        await self.bot.db.insert_row(
+            table_name='users',
+            record_info=[
+                member.id,
+                member.name
+            ]
+        )
 
 
 
@@ -152,7 +170,7 @@ class MessageReactsCog(commands.Cog):
 
         # re-fetch the message after a short delay to ensure embeds are
         # properly detected before evaluation
-        await asyncio.sleep(1)
+        time.sleep(0.5)
         message = await self.bot.get_channel(message.channel.id) \
                                 .fetch_message(message.id)
 

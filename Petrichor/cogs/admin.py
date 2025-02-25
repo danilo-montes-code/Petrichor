@@ -111,7 +111,7 @@ class AdminCog(commands.Cog):
             'admin',
             'data',
             'dev_commands',
-            'message_reacts',
+            'event_handlers',
             # 'reminders'
         ]
     ) -> None:

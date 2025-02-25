@@ -5,13 +5,14 @@ Contains a class that manages the connection to the database.
 
 import asyncpg
 
-from util.printing import print_petrichor_msg
+from util.printing import print_petrichor_msg, print_petrichor_error
 
 import os
 
 from discord import Interaction
 from asyncpg import Record
 from asyncpg.pool import PoolAcquireContext
+from asyncpg.exceptions import UniqueViolationError
 
 
 
@@ -131,9 +132,11 @@ class DatabaseConnectionManager:
         """
 
         query = await self._generate_insert_query(table_name, record_info)
-        await self._execute_query(query)
-
-        print_petrichor_msg(f'Row inserted into {table_name}')
+        result = await self._execute_query(query)
+        if not result:
+            print_petrichor_error(f'Error inserting row into {table_name}')
+        else:
+            print_petrichor_msg(f'Row inserted into {table_name}')
 
 
     async def _get_table_column_info(
@@ -272,7 +275,7 @@ class DatabaseConnectionManager:
                 return await conn.fetch(query)
 
 
-    async def _execute_query(self, query : str) -> None:
+    async def _execute_query(self, query : str) -> str | None:
         """
         Performs a query.
 
@@ -280,9 +283,21 @@ class DatabaseConnectionManager:
         ----------
         query : str
             the PostgreSQL query to run
+
+        Return
+        ------
+        str
+            status of the SQL command | 
+            None, if the command was not executed
         """
 
         conn : PoolAcquireContext
         async with self._db_pool.acquire() as conn:
             async with conn.transaction():
-                return await conn.execute(query)
+                try:
+                    return await conn.execute(query)
+                
+                except UniqueViolationError:
+                    print_petrichor_error(
+                        'Key value already exists'
+                    )
