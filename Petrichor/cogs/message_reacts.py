@@ -152,7 +152,7 @@ class MessageReactsCog(commands.Cog):
 
         # re-fetch the message after a short delay to ensure embeds are
         # properly detected before evaluation
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(1)
         message = await self.bot.get_channel(message.channel.id) \
                                 .fetch_message(message.id)
 

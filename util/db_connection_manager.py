@@ -112,11 +112,6 @@ class DatabaseConnectionManager:
         print_petrichor_msg(f"Tables: {[table['table_name'] for table in tables]}")
                 
 
-    # async def insert_row(
-    #     self, 
-    #     table_name : str, 
-    #     interaction : Interaction
-    # ) -> None:
     async def insert_row(
         self, 
         table_name : str, 
@@ -135,8 +130,6 @@ class DatabaseConnectionManager:
             the data to insert into the table
         """
 
-        # get from interaction
-        # record_info = [] 
         query = await self._generate_insert_query(table_name, record_info)
         await self._execute_query(query)
 

@@ -78,7 +78,15 @@ class ActionsCog(commands.Cog):
             f"By fate, {interaction.user.display_name} has pinged {ping_victim.mention}. Congrats!"
         )
 
-        # TODO add record to rtp table
+        await self.bot.db.insert_row(
+            table_name='roll_the_pings',
+            record_info=[
+                interaction.user.id,
+                ping_victim.id,
+                interaction.guild_id,
+                interaction.created_at
+            ]
+        )
 
 
     @app_commands.command(
@@ -128,8 +136,7 @@ class ActionsCog(commands.Cog):
             message : Message
             async for message in pov_channel.history(limit=limit):
 
-                if  (not message.embeds 
-                     and 'https://' not in message.content):
+                if not 'https://' not in message.content:
                     if  (not message.attachments
                          or not [file 
                                  for file in message.attachments 

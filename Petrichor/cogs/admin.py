@@ -9,6 +9,7 @@ from discord.ext import commands
 
 from util.printing import print_petrichor_msg, print_petrichor_error
 from util.casting import get_id
+from Petrichor.cogs import EXTENSIONS
 
 from typing import Literal
 from discord.ext.commands import (
@@ -17,7 +18,6 @@ from discord.ext.commands import (
     NoEntryPointError,
     ExtensionFailed
 )
-
 from discord import Interaction
 from discord.ext.commands import Context
 
@@ -125,12 +125,63 @@ class AdminCog(commands.Cog):
         cog : Literal[str]
             the cog to reload
         """
-        try: 
-            cog_path = f'Petrichor.cogs.{cog}'
-            print_petrichor_msg(f'Attempting to reload: {cog}')
-            await self.bot.reload_extension(cog_path)
+        cog_path = f'Petrichor.cogs.{cog}'
+        reload_successful = await self._reload_cog(cog_path)
+        if reload_successful:
             print_petrichor_msg('Reload successful')
             await interaction.response.send_message(f'Reloaded {cog} Cog')
+            return
+    
+        print_petrichor_msg('Reload unsuccessful')
+        await interaction.response.send_message(f'Could not reload {cog} Cog')
+        return
+
+
+
+    @app_commands.command(
+        name='reload-cogs',
+        description='Reloads all Cogs'
+    )
+    async def reload_cogs(
+        self, 
+        interaction : Interaction
+    ) -> None:
+        """
+        Reloads a given Cog.
+
+        Parameters
+        ----------
+        interaction : Interaction
+            the interaction that evoked the command
+        """
+        for cog in EXTENSIONS:
+            reload_successful = await self._reload_cog(cog)
+            if reload_successful:   print_petrichor_msg('Reload successful')
+            else:                   print_petrichor_error('Reload unsuccessful')
+        await interaction.response.send_message('Reloaded Cogs')
+
+
+    async def _reload_cog(self, cog_path : str) -> bool:
+        """
+        Reloads a given cog.
+        
+        Parameters
+        ----------
+        cog_path : str
+            cog to reload
+
+        Returns
+        -------
+        bool
+            True,   if the reload was successful | 
+            False, otherwise
+        """
+        
+        try: 
+            cog = cog_path.split('.')[-1]
+            print_petrichor_msg(f'Attempting to reload: {cog}')
+            await self.bot.reload_extension(cog_path)
+            return True
 
         except ExtensionNotLoaded:
             print_petrichor_error('Extension was not loaded')
@@ -140,6 +191,8 @@ class AdminCog(commands.Cog):
             print_petrichor_error('Extension does not have a setup function')
         except ExtensionFailed:
             print_petrichor_error('Extension setup had an execution error')
+
+        return False
 
 
 

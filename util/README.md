@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS roll_the_pings(
     pinger VARCHAR(20) REFERENCES users(user_id),
     pingee VARCHAR(20) REFERENCES users(user_id),
     guild_id VARCHAR(20),
-    ping_time TIMESTAMP
+    ping_time TIMESTAMPTZ
 );
 ```
 
