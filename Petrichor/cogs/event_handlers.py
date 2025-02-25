@@ -170,7 +170,7 @@ class MessageReactsCog(commands.Cog):
 
         # re-fetch the message after a short delay to ensure embeds are
         # properly detected before evaluation
-        time.sleep(0.5)
+        time.sleep(2)
         message = await self.bot.get_channel(message.channel.id) \
                                 .fetch_message(message.id)
 
