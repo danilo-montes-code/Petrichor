@@ -66,6 +66,9 @@ class MessageReactsCog(commands.Cog):
             the message that was sent
         """
 
+        # preserve the ability to react to bots
+        await self.igh_bro(message)
+
         if message.author.bot:
             return
 
@@ -77,7 +80,6 @@ class MessageReactsCog(commands.Cog):
             await self.post_to_pov(message.content)
 
         await self.crazy_check(message)
-        await self.igh_bro(message)
         await self.embed_evaluation(message)
 
         await self.bot.process_commands(message)
@@ -152,6 +154,9 @@ class MessageReactsCog(commands.Cog):
         """
 
         if message.channel.id != get_id('APEX_GAME_UPDATES'):
+            return
+
+        if message.author.id in (get_id('PETRICHOR_ID'), get_id('PETRICHOR_TESTING_ID')):
             return
 
         await self.respond_to_user(message=message, response='igh bro')

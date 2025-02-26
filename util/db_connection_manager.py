@@ -9,7 +9,6 @@ from util.printing import print_petrichor_msg, print_petrichor_error
 
 import os
 
-from discord import Interaction
 from asyncpg import Record
 from asyncpg.pool import PoolAcquireContext
 from asyncpg.exceptions import UniqueViolationError
@@ -122,6 +121,7 @@ class DatabaseConnectionManager:
         Inserts a row into a given database. It is assumed that `record_info`
         contains properly formatted data—that is, each item in the list
         matches up with its corresponding column in the table `table_name`.
+        As of now, all data will be wrapped in a `str` cast prior to insertion.
         
         Parameters
         ----------

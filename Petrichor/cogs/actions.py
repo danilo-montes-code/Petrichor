@@ -13,6 +13,7 @@ import random, pathlib
 
 from discord import (
     Interaction,
+    InteractionCallbackResponse,
     Member,
     Message,
     Forbidden,
@@ -74,13 +75,15 @@ class ActionsCog(commands.Cog):
 
         ping_victim = random.choice(role_havers)
 
-        await interaction.response.send_message(
+        bot_response : InteractionCallbackResponse
+        bot_response = await interaction.response.send_message(
             f"By fate, {interaction.user.display_name} has pinged {ping_victim.mention}. Congrats!"
         )
 
         await self.bot.db.insert_row(
             table_name='roll_the_pings',
             record_info=[
+                bot_response.message_id,
                 interaction.user.id,
                 ping_victim.id,
                 interaction.guild_id,
@@ -136,11 +139,11 @@ class ActionsCog(commands.Cog):
             message : Message
             async for message in pov_channel.history(limit=limit):
 
-                if not 'https://' not in message.content:
+                if 'https://' not in message.content:
                     if  (not message.attachments
                          or not [file 
                                  for file in message.attachments 
-                                 if pathlib.Path(file.filename).suffix != '.mp4']):
+                                 if pathlib.Path(file.filename).suffix == '.mp4']):
                         continue
                     
 
@@ -178,14 +181,14 @@ class ActionsCog(commands.Cog):
             )
 
         except Forbidden:
-            print_petrichor_error('lacking perms to get channel history')
+            print_petrichor_error('Lacking perms to get channel history')
         except HTTPException as err:
-            print_petrichor_error('Request failed')
+            print_petrichor_error('Request to get channel history failed')
             print_petrichor_error('Response:', err.response)
             print_petrichor_error('Text:', err.text)
             print_petrichor_error('Status:', err.status)
         except Exception as err:
-            print_petrichor_error('other exception raised:', err)
+            print_petrichor_error('Other exception raised:', err)
     
 
 
