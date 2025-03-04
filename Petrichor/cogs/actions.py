@@ -9,17 +9,15 @@ from discord.ext import commands
 from util.printing import print_petrichor_error
 from util.casting import get_id
 
-import random, pathlib
+import pathlib
 
 from discord import (
     Interaction,
-    InteractionCallbackResponse,
-    Member,
+    TextChannel,
     Message,
     Forbidden,
     HTTPException
 )
-from discord import TextChannel
 
 from Petrichor.PetrichorBot import PetrichorBot
 
@@ -47,50 +45,6 @@ class ActionsCog(commands.Cog):
         self.bot = bot
 
 
-    @app_commands.command(
-        name='rtp',
-        description='Chooses a random active member to ping :D'
-    )
-    async def roll_the_ping(self, interaction : Interaction):
-        """
-        Picks a random active member and pings them. Makes a record of the ping
-        as well.
-
-        Parameters
-        ----------
-        interaction : Interaction
-            the interaction that evoked the command
-        """
-
-        role_havers : list[Member] = []
-
-        for member in interaction.guild.members:
-
-            role_names : list[str] = [role.name.lower() for role in member.roles]
-
-            if "has no interesting roles" in role_names or "bot schmuck" in role_names:
-                continue
-
-            role_havers.append(member)
-
-        ping_victim = random.choice(role_havers)
-
-        bot_response : InteractionCallbackResponse
-        bot_response = await interaction.response.send_message(
-            f"By fate, {interaction.user.display_name} has pinged {ping_victim.mention}. Congrats!"
-        )
-
-        await self.bot.db.insert_row(
-            table_name='roll_the_pings',
-            record_info=[
-                bot_response.message_id,
-                interaction.user.id,
-                ping_victim.id,
-                interaction.guild_id,
-                interaction.created_at
-            ]
-        )
-
 
     @app_commands.command(
         name='pingus',
@@ -109,6 +63,8 @@ class ActionsCog(commands.Cog):
         await interaction.response.send_message(content=self.bot.latency)
 
 
+    # TODO maybe making into hybrid command? if the app command is too long,
+    # a standard command might be able to handle the increased wait time
     @app_commands.command(
         name='last-clip',
         description='Gets the link of the user\'s most recent posted clip'
@@ -134,6 +90,7 @@ class ActionsCog(commands.Cog):
         """
         
         pov_channel : TextChannel = self.bot.get_channel(get_id('APEX_POV_ID'))
+        if game: game = game.lower()
 
         try:
             message : Message
@@ -156,7 +113,7 @@ class ActionsCog(commands.Cog):
                     ):
                     if game:
                         if (not message.embeds 
-                            or game.replace(' ', '-') not in message.embeds[-1].url):
+                            or game.replace(' ', '-') not in message.embeds[-1].url.lower()):
                                 continue
 
                         await interaction.response.send_message(

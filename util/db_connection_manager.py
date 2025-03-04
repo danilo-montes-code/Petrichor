@@ -252,6 +252,126 @@ class DatabaseConnectionManager:
         #     case 'int' | 'float' | 'bool': return data
         #     case _: return 'NO DATA MAPPING'
         return f"'{data}'"
+    
+
+    async def fetch_rows(
+        self,
+        table_name : str,
+        columns : str | list[str] = None,
+        where : str = None,
+        group_by : str | list[str] = None,
+        order_by : str | list[str] = None,
+        order_by_ascending : bool = True,
+        distinct : bool = False,
+        limit : int = None
+    ) -> list[Record]:
+        """
+        Fetches all rows from a given table in the database that match the 
+        search criteria.
+        
+        Parameters
+        ----------
+        table_name : str
+            the name of the table to select from
+        columns : str | list[str], default = None
+            the column(s) to include in the search, defaults to all columns
+        where : str, default = None
+            the criteria that all selected rows must follow
+        group_by : str | list[str], default = None
+            the column(s) to group the results by      
+        order_by : str | list[str], default = None
+            the column(s) to order the results by
+        order_by_ascending : bool, default = True
+            if True, results are sorting in ascending order |
+            if False, results are sorting in descending order
+        distinct : bool, default = False
+            if True, only selects distinct rows |
+            if False, duplicate column contents are allowed
+        limit : int, default = None
+            the maximum number of results to fetch, defaults to all valid rows
+
+        Returns
+        -------
+        list[Record]
+            the records found in the search
+        """
+
+        query = await self._generate_fetch_query(
+            table_name,
+            columns,
+            where,
+            group_by,
+            order_by,
+            order_by_ascending,
+            distinct,
+            limit
+        )
+        result = await self._fetch_query(query)
+        if not result:
+            print_petrichor_msg(f'No matching rows found in {table_name}')
+        else:
+            print_petrichor_msg(f'{len(result)} rows fetched from {table_name}')
+        return result
+
+
+    async def _generate_fetch_query(
+        self,
+        table_name : str,
+        columns : str | list[str] = None,
+        where : str = None,
+        group_by : str | list[str] = None,
+        order_by : str | list[str] = None,
+        order_by_ascending : bool = True,
+        distinct : bool = False,
+        limit : int = None
+    ) -> str:
+        """
+        Generates and returns a fetch query string given specifiers.
+        
+        Parameters
+        ----------
+        table_name : str
+            the name of the table to select from
+        columns : str | list[str], default = None
+            the column(s) to include in the search, defaults to all columns
+        where : str, default = None
+            the criteria that all selected rows must follow
+        group_by : str | list[str], default = None
+            the column(s) to group the results by            
+        order_by : str | list[str], default = None
+            the column(s) to order the results by
+        order_by_ascending : bool, default = True
+            if True, results are sorting in ascending order |
+            if False, results are sorting in descending order
+        distinct : bool, default = False
+            if True, only selects distinct rows |
+            if False, duplicate column contents are allowed
+        limit : int, default = None
+            the maximum number of results to fetch, defaults to all valid rows
+        
+        Returns
+        -------
+        str
+            the generated fetch query
+        """
+
+        # make into lists if needed so .join() can work
+        if type(columns) == str:  columns = [columns]
+        if type(group_by) == str: group_by = [group_by]
+        if type(order_by) == str: order_by = [order_by]
+        
+        query = (
+            f'SELECT {'DISTINCT' if distinct else ''}'
+            f'{'*' if not columns else ', '.join(columns)}'
+            f' FROM {table_name}'
+            f'{f" WHERE {where}" if where else ""}'
+            f'{f" GROUP BY {', '.join(group_by)}" if group_by else ""}'
+            f'{f" ORDER BY {', '.join(order_by)}" if order_by else ""}'
+            f'{'' if order_by_ascending else ' DESC'}'
+            f'{f" LIMIT {limit}" if limit is not None else ""}'
+            ';'
+        )
+        return query
 
 
     async def _fetch_query(self, query : str) -> list[Record]:

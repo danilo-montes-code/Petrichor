@@ -5,6 +5,16 @@ Contains the Cog that holds commands whose main focus is CRUD operations.
 
 from discord.ext import commands
 from discord import app_commands
+import discord
+
+from discord import (
+    Interaction,
+    Member,
+    Guild
+)
+from asyncpg import Record
+
+from Petrichor.PetrichorBot import PetrichorBot
 
 
 class DataCog(commands.Cog):
@@ -13,17 +23,17 @@ class DataCog(commands.Cog):
 
     Attributes
     ----------
-    bot : commands.Bot
+    bot : PetrichorBot
         bot that the commands belong to
     """
 
-    def __init__(self, bot : commands.Bot):
+    def __init__(self, bot : PetrichorBot):
         """
         Creates an instance of the DataCog class.
 
         Parameters
         ----------
-        bot : commands.Bot
+        bot : PetrichorBot
             bot that the commands belong to
         """
         self.bot = bot

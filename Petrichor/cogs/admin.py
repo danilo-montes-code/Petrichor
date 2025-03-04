@@ -112,7 +112,8 @@ class AdminCog(commands.Cog):
             'data',
             'dev_commands',
             'event_handlers',
-            # 'reminders'
+            # 'reminders',
+            'roll_the_ping'
         ]
     ) -> None:
         """
