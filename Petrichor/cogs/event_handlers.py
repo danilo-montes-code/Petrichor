@@ -7,13 +7,33 @@ from discord.ext import commands
 
 from util.casting import get_id
 
-import random, time
+import random, time, asyncio
 
 from discord import (
     Message, 
     Member
 )
 from Petrichor.PetrichorBot import PetrichorBot
+
+
+EMBED_FAILS = [
+    'https://tenor.com/view/epic-embed-fail-ryan-gosling-cereal-embed-failure-laugh-at-this-user-gif-20627924',
+    'https://tenor.com/view/epic-embed-fail-embed-fail-embed-discord-embed-gif-embed-gif-21924703',
+    'https://tenor.com/view/embed-perms-no-image-perms-epic-embed-fail-laughing-emoji-gif-25041403',
+    'https://tenor.com/view/epic-embed-fail-embed-embedfail-get-it-fail-embed-gif-22402006'
+]
+
+EMBED_SUCCESSES = [
+    'https://tenor.com/view/epic-embed-success-gif-25677703',
+    'https://tenor.com/view/catboy-cereal-embed-success-ryan-gosling-gif-21943489',
+    'https://tenor.com/view/epic-embed-success-epic-embed-fail-gif-21239189',
+    'https://tenor.com/view/embed-fail-embed-gif-24490045'
+]
+
+EMBED_FAIL_EXCEPTIONS = [
+    'https://www.discord.com/channels/',
+    'https://www.instagram.com'
+]
 
 
 
@@ -38,20 +58,6 @@ class MessageReactsCog(commands.Cog):
         """
 
         self.bot = bot
-        self.embed_fails = [
-            'https://tenor.com/view/epic-embed-fail-ryan-gosling-cereal-embed-failure-laugh-at-this-user-gif-20627924',
-            'https://tenor.com/view/epic-embed-fail-embed-fail-embed-discord-embed-gif-embed-gif-21924703',
-            'https://tenor.com/view/embed-perms-no-image-perms-epic-embed-fail-laughing-emoji-gif-25041403',
-            'https://tenor.com/view/epic-embed-fail-embed-embedfail-get-it-fail-embed-gif-22402006'
-        ]
-        # mid ground
-        # 'https://tenor.com/view/embed-fail-embed-fail-intentional-intentional-embed-gif-17355838859230793055',
-        self.embed_successes = [
-            'https://tenor.com/view/epic-embed-success-gif-25677703',
-            'https://tenor.com/view/catboy-cereal-embed-success-ryan-gosling-gif-21943489',
-            'https://tenor.com/view/epic-embed-success-epic-embed-fail-gif-21239189',
-            'https://tenor.com/view/embed-fail-embed-gif-24490045'
-        ]
 
 
 
@@ -175,7 +181,7 @@ class MessageReactsCog(commands.Cog):
 
         # re-fetch the message after a short delay to ensure embeds are
         # properly detected before evaluation
-        time.sleep(2)
+        await asyncio.sleep(5)
         message = await self.bot.get_channel(message.channel.id) \
                                 .fetch_message(message.id)
 
@@ -183,10 +189,10 @@ class MessageReactsCog(commands.Cog):
             if 'https://' not in message.content:
                 return
             
-            await self.respond_to_user(
-                message=message, 
-                response=random.choice(self.embed_fails)
-            )
+            if self._link_is_an_embed_expection(message.content):
+                return
+            
+            await message.reply(content=random.choice(EMBED_FAILS))
             return
 
 
@@ -199,11 +205,29 @@ class MessageReactsCog(commands.Cog):
         if random.random() < (90 / 100):
             return
 
-        await self.respond_to_user(
-            message=message, 
-            response=random.choice(self.embed_successes)
-        )
+        await message.reply(content=random.choice(EMBED_SUCCESSES))
         return
+    
+
+    def _link_is_an_embed_expection(self, message : str) -> bool:
+        """
+        Returns True if the given message has a link that is an exception
+        for embed evaluations.
+        
+        Parameters
+        ----------
+        message : str
+            the message to process
+        
+        Returns
+        -------
+        bool
+            True,   if the given message has a link that is an exception
+            for embed evaluations |
+            False,  otherwise
+        """
+
+        return any(link in message for link in EMBED_FAIL_EXCEPTIONS)
 
 
 
