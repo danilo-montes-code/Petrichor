@@ -22,6 +22,14 @@ from discord import (
 from Petrichor.PetrichorBot import PetrichorBot
 
 
+GAME_CLIP_LINKS = (
+    'https://outplayed.tv',
+    'https://medal.tv',
+    'https://youtu.be',
+    'https://cdn.steamusercontent.com'
+)
+
+
 
 class ActionsCog(commands.Cog):
     """
@@ -72,8 +80,9 @@ class ActionsCog(commands.Cog):
     async def last_clip(
         self, 
         interaction : Interaction, 
-        game : str = None,
-        limit : int = 100
+        game : str = '',
+        limit : int = 100,
+        skip : int = 0
     ) -> None:
         """
         Gets the link of the last clip that the user posted in the POV channel.
@@ -87,47 +96,53 @@ class ActionsCog(commands.Cog):
             (only works on clips sent as links)
         limit : int, default = 100
             the maximum number of messages to search through
+        skip : int, default = 0
+            the number of found clips/files to skip over. Useful if you have
+            sent non-clip mp4 files and wish to pass over them to continue searching.
         """
+
+        if skip < 0:
+            await interaction.response.send_message(
+                'Please enter a positive number of found messages to skip.'
+            )
+            return
         
         pov_channel : TextChannel = self.bot.get_channel(get_id('APEX_POV_ID'))
+
+        if not pov_channel:
+            print_petrichor_error('Clips channel not found.')
+            return
+
         if game: game = game.lower()
 
         try:
             message : Message
             async for message in pov_channel.history(limit=limit):
 
-                if 'https://' not in message.content:
-                    if  (not message.attachments
-                         or not [file 
-                                 for file in message.attachments 
-                                 if pathlib.Path(file.filename).suffix == '.mp4']):
-                        continue
+                if not self._message_has_clip_link_or_mp4(message):
+                    continue
                     
+                if not self._message_is_from_user(message, interaction):
+                    continue
 
-                # since I send game clips through this bot, check for messages
-                # from both the both and myself if I use this command
-                if (
-                    (interaction.user.id == get_id('MY_ID') and
-                    message.author.id == get_id('PETRICHOR_ID')) 
-                    or message.author == interaction.user
-                    ):
-                    if game:
-                        if (not message.embeds 
-                            or game.replace(' ', '-') not in message.embeds[-1].url.lower()):
-                                continue
-
-                        await interaction.response.send_message(
-                            content= \
-                            f'Your last game clip was here: {message.jump_url}'
-                        )
-
-                    else:
-                        await interaction.response.send_message(
-                            content= \
-                            f'Your last game clip was here: {message.jump_url}'
-                        )
-                        
-                    return
+                if game:
+                    if (not message.embeds 
+                        or not self._link_has_game_in_text(
+                            game=game,
+                            link=str(message.embeds[-1].url).lower()
+                        )):
+                            continue
+                    
+                if skip > 0:
+                    skip -= 1
+                    continue
+            
+                await interaction.response.send_message(
+                    content= \
+                    f'Your last game clip was here: {message.jump_url}'
+                )
+                    
+                return
                 
             await interaction.response.send_message(
                 content= \
@@ -141,12 +156,117 @@ class ActionsCog(commands.Cog):
             print_petrichor_error('Lacking perms to get channel history')
         except HTTPException as err:
             print_petrichor_error('Request to get channel history failed')
-            print_petrichor_error('Response:', err.response)
-            print_petrichor_error('Text:', err.text)
-            print_petrichor_error('Status:', err.status)
+            print_petrichor_error('Response:' + str(err.response))
+            print_petrichor_error('Text:' + str(err.text))
+            print_petrichor_error('Status:' + str(err.status))
         except Exception as err:
-            print_petrichor_error('Other exception raised:', err)
+            print_petrichor_error('Other exception raised:' + str(err))
+
+
+    def _message_has_clip_link_or_mp4(self, message : Message) -> bool:
+        """
+        Returns True if the given Message has either a link to a clip 
+        or an mp4 file.
+
+        Parameters
+        ----------
+        message : Message
+            the message to process
+
+        Returns
+        -------
+        bool
+            True,   if the given Message has either a clip link or an mp4 file |
+            False,  otherwise
+        """
+
+        if 'https://' not in message.content:
+
+            if not message.attachments:
+                return False
+            
+            if not [file 
+                    for file in message.attachments 
+                    if pathlib.Path(file.filename).suffix == '.mp4']:
+                return False
+        
+        if not self._link_is_a_game_clip(message.content):
+            return False
+
+        return True
+
+
+    def _link_is_a_game_clip(self, message : str) -> bool:
+        """
+        Returns True if the given message has a link that is a game clip.
+
+        Parameters
+        ----------
+        message : str
+            the message to process
+
+        Returns
+        -------
+        bool
+            True,   if the given message has a link that is a game clip |
+            False,  otherwise
+        """
+
+        return any(link in message for link in GAME_CLIP_LINKS)
     
+
+    def _message_is_from_user(
+            self, 
+            message : Message, 
+            interaction: Interaction
+        ) -> bool:
+        """
+        Returns True if the given Message was sent from the same user that
+        sent the Interaction.
+
+        Parameters
+        ----------
+        message : Message
+            the message to process
+
+        Returns
+        -------
+        bool
+            True,   if the given Message is from the user |
+            False,  otherwise
+        """
+        # since I send game clips through this bot, check for messages
+        # from both the both and myself if I use this command
+        return (
+            (
+                interaction.user.id == get_id('MY_ID') and
+                message.author.id == get_id('PETRICHOR_ID')
+            ) or message.author == interaction.user
+        )
+
+
+    def _link_has_game_in_text(
+        self, 
+        game : str,
+        link : str
+    ) -> bool:
+        """
+        Returns True if the game appears in the text of the link.
+        
+        Parameters
+        ----------
+        game : str
+            the name of the game to check for
+        link : str
+            the link to check
+        
+        Returns
+        -------
+        True,   if the given link has the game inside |
+        False,  otherwise
+        """
+        return game.replace(' ', '-') in link
+
 
 
 async def setup(bot : commands.Bot) -> None:
@@ -158,4 +278,6 @@ async def setup(bot : commands.Bot) -> None:
     bot : commands.Bot
         the bot to add the cog to
     """
+    bot : PetrichorBot
+
     await bot.add_cog(ActionsCog(bot))

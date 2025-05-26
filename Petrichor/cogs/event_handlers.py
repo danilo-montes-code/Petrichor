@@ -7,7 +7,7 @@ from discord.ext import commands
 
 from util.casting import get_id
 
-import random, time, asyncio
+import random, asyncio
 
 from discord import (
     Message, 
@@ -31,7 +31,7 @@ EMBED_SUCCESSES = [
 ]
 
 EMBED_FAIL_EXCEPTIONS = [
-    'https://www.discord.com/channels/',
+    'https://www.discord.com',
     'https://www.instagram.com'
 ]
 
@@ -200,9 +200,9 @@ class MessageReactsCog(commands.Cog):
         if message.channel.id == get_id('APEX_POV_ID'):
             return
 
-        # only run this 10% of the time because it would get annoying real quick
+        # only run this 2% of the time because it would get annoying real quick
         # more than it already will be
-        if random.random() < (90 / 100):
+        if random.random() < (98 / 100):
             return
 
         await message.reply(content=random.choice(EMBED_SUCCESSES))
