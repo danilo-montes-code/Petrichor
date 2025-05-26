@@ -7,7 +7,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from util.printing import print_petrichor_error
-from util.casting import get_id
+from util.env_vars import get_id
 
 import pathlib
 
@@ -91,7 +91,7 @@ class ActionsCog(commands.Cog):
         ----------
         interaction : Interaction
             the interaction that evoked the command
-        game : str, default = None
+        game : str, default = ''
             the name of the game to search for the last posted clip of
             (only works on clips sent as links)
         limit : int, default = 100

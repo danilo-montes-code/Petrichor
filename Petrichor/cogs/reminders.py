@@ -8,7 +8,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 
 from util.printing import print_petrichor_msg
-from util.casting import get_id
+from util.env_vars import get_id
 
 import os
 

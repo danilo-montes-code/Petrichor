@@ -8,7 +8,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from util.printing import print_petrichor_msg, print_petrichor_error
-from util.casting import get_id
+from util.env_vars import get_id
 from Petrichor.cogs import EXTENSIONS
 
 from typing import Literal

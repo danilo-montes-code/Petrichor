@@ -5,7 +5,7 @@ Contains the Cog that manages message reactions.
 
 from discord.ext import commands
 
-from util.casting import get_id
+from util.env_vars import get_id, get_dict
 
 import random, asyncio
 
@@ -78,12 +78,7 @@ class MessageReactsCog(commands.Cog):
         if message.author.bot:
             return
 
-        # sends messages from clips channels in archive server
-        # to another server
-        if (message.guild.id == get_id('FANTA_ID') and 
-           'clips' in message.channel.name):
-
-            await self.post_to_pov(message.content)
+        await self.repost_game_clips(message)
 
         await self.crazy_check(message)
         await self.embed_evaluation(message)
@@ -236,6 +231,64 @@ class MessageReactsCog(commands.Cog):
     ###                    channel posting                     ###
     #######                                                #######
     ##############################################################
+
+    async def repost_game_clips(
+        self,
+        message : Message,
+    ) -> None:
+        """
+        Reposts game clips posted to my archive server to another server.
+        
+        Parameters
+        ----------
+        message : Message
+            the message to repost, if applicable
+        """
+        
+        if message.guild.id != get_id('FANTA_ID'):
+            return
+        
+        if 'clips' not in message.channel.name:
+            return
+        
+        if '!keep' in message.content:
+            return
+                
+        text_to_send = self._replace_name_with_id(message.content)
+
+        await self.post_to_pov(text_to_send)
+
+
+    def _replace_name_with_id(self, message : str) -> str:
+        """
+        Replaces the name with the direct @ of the user.
+        
+        Parameters
+        ----------
+        message : str
+            the message to process
+        
+        Returns
+        -------
+        str
+            the new message with the names swapped with the @ pings
+        """
+
+        friends = get_dict('FRIEND_IDS')
+
+        for friend in friends:
+            friend : str
+
+            if friend.lower() in message.lower():
+
+                message = message.replace(
+                    friend.lower(),
+                    f'<@{friends[friend]}>'
+                )
+
+
+        return message
+
 
     async def post_to_power(self, message_content: str) -> None:
         """
