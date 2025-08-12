@@ -1,3 +1,4 @@
+#!/usr/bin/env -S uv run --env-file .env
 """main.py
 
 The driver for the Petrichor bot.
