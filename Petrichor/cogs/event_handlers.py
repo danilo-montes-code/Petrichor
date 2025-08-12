@@ -11,7 +11,8 @@ import random, asyncio
 
 from discord import (
     Message, 
-    Member
+    Member,
+    Role
 )
 from Petrichor.PetrichorBot import PetrichorBot
 
@@ -89,8 +90,12 @@ class MessageReactsCog(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, member : Member) -> None:
         if member.bot:
+            bot_role : Role = member.guild.get_role(1184688230721921074)
+            await member.add_roles(bot_role)
             return
         
+        no_interesting_roles_role : Role = member.guild.get_role(1324385353783840931)
+        await member.add_roles(no_interesting_roles_role)
         await self.bot.db.insert_row(
             table_name='users',
             record_info=[
