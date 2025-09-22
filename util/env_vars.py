@@ -3,11 +3,13 @@
 Contains methods for getting environment variables.
 """
 
+import os
+import json
+from json import JSONDecodeError
+
 from util.printing import print_petrichor_error
 
-import os, json
 
-from json import JSONDecodeError
 
 def get_id(name : str) -> int:
     """

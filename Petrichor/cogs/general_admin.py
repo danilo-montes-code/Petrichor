@@ -2,6 +2,7 @@
 
 Contains the Cog that holds admin commands.
 """
+from __future__ import annotations
 
 import discord
 from discord import app_commands
@@ -12,14 +13,16 @@ from util.env_vars import get_id
 from Petrichor.cogs import EXTENSIONS
 
 from typing import Literal
-from discord.ext.commands import (
-    ExtensionNotLoaded,
-    ExtensionNotFound,
-    NoEntryPointError,
-    ExtensionFailed
-)
-from discord import Interaction
-from discord.ext.commands import Context
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from discord.ext.commands import (
+        ExtensionNotLoaded,
+        ExtensionNotFound,
+        NoEntryPointError,
+        ExtensionFailed
+    )
+    from discord import Interaction
+    from discord.ext.commands import Context
 
 
 
@@ -108,10 +111,11 @@ class AdminCog(commands.Cog):
         interaction : Interaction,
         cog : Literal[
             'actions',
-            'admin',
-            'data',
-            'dev_commands',
+            'euoh_admin',
+            'euoh',
             'event_handlers',
+            'general_admin',
+            'general_dev',
             # 'reminders',
             'roll_the_ping'
         ]

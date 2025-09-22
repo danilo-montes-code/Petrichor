@@ -3,6 +3,8 @@
 Contains methods for printing.
 """
 
+
+
 def print_petrichor_msg(message : str) -> None:
     """
     Prints a given message to the console with the Petrichor prefix.

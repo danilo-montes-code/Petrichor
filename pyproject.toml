@@ -1,7 +1,7 @@
 [project]
-name = "petrichor"
-version = "0.1.0"
-description = "Add your description here"
+name = "Petrichor"
+version = "1.0.0"
+description = "A silly bot for me and my friends."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [

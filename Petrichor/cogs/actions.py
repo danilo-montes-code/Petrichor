@@ -2,6 +2,9 @@
 
 Contains the Cog that holds commands that perform actions.
 """
+from __future__ import annotations
+
+import pathlib
 
 from discord import app_commands
 from discord.ext import commands
@@ -9,17 +12,17 @@ from discord.ext import commands
 from util.printing import print_petrichor_error
 from util.env_vars import get_id
 
-import pathlib
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from discord import (
+        Interaction,
+        TextChannel,
+        Message,
+        Forbidden,
+        HTTPException
+    )
 
-from discord import (
-    Interaction,
-    TextChannel,
-    Message,
-    Forbidden,
-    HTTPException
-)
-
-from Petrichor.PetrichorBot import PetrichorBot
+    from Petrichor.PetrichorBot import PetrichorBot
 
 
 GAME_CLIP_LINKS = (

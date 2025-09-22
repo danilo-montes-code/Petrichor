@@ -2,21 +2,24 @@
 
 Contains the Cog that holds commands related to `/rtp`.
 """
+from __future__ import annotations
+
+import random
 
 from discord.ext import commands
 from discord import app_commands
 
-import random
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from discord import (
+        Interaction,
+        Member,
+        Guild,
+        InteractionCallbackResponse
+    )
+    from asyncpg import Record
 
-from discord import (
-    Interaction,
-    Member,
-    Guild,
-    InteractionCallbackResponse
-)
-from asyncpg import Record
-
-from Petrichor.PetrichorBot import PetrichorBot
+    from Petrichor.PetrichorBot import PetrichorBot
 
 
 
@@ -40,11 +43,6 @@ class RollThePingCog(commands.Cog):
             bot that the commands belong to
         """
         self.bot = bot
-
-    ping_counts = app_commands.Group(
-        name='ping-counts',
-        description='Contains commands related to fetching /rtp data'
-    )
 
 
 
@@ -92,7 +90,14 @@ class RollThePingCog(commands.Cog):
             ]
         )
 
+
     
+    ping_counts = app_commands.Group(
+        name='ping-counts',
+        description='Contains commands related to fetching /rtp data'
+    )
+
+
     @ping_counts.command(
         name='victim',
         description='Get the ranking of ping victims'

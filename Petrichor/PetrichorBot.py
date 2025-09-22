@@ -2,6 +2,9 @@
 
 Contains a class that represents the Petrichor bot.
 """
+from __future__ import annotations
+
+import os
 
 import discord
 from discord.ext import commands
@@ -9,9 +12,9 @@ from discord.ext import commands
 from util.printing import print_petrichor_msg
 from Petrichor.cogs import EXTENSIONS
 
-import os
-
-from util.db_connection_manager import DatabaseConnectionManager
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from util.db_connection_manager import DatabaseConnectionManager
 
 
 
@@ -47,8 +50,9 @@ class PetrichorBot(commands.Bot):
             intents=intents,
             *args, **kwargs
         )
-
         self.db = db_conn
+        self.euoh_locked = False
+
 
     
     async def on_ready(self):

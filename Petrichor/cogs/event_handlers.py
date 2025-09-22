@@ -2,19 +2,25 @@
 
 Contains the Cog that manages message reactions.
 """
+from __future__ import annotations
+
+import random
+import asyncio
 
 from discord.ext import commands
 
 from util.env_vars import get_id, get_dict
 
-import random, asyncio
 
-from discord import (
-    Message, 
-    Member,
-    Role
-)
-from Petrichor.PetrichorBot import PetrichorBot
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from discord import (
+        Message, 
+        Member,
+        Role
+    )
+
+    from Petrichor.PetrichorBot import PetrichorBot
 
 
 EMBED_FAILS = [
@@ -33,7 +39,8 @@ EMBED_SUCCESSES = [
 
 EMBED_FAIL_EXCEPTIONS = [
     'https://www.discord.com',
-    'https://www.instagram.com'
+    'https://www.instagram.com',
+    'https://www.discordapp.com'
 ]
 
 
@@ -189,7 +196,7 @@ class MessageReactsCog(commands.Cog):
             if 'https://' not in message.content:
                 return
             
-            if self._link_is_an_embed_expection(message.content):
+            if self._link_is_an_embed_exception(message.content):
                 return
             
             await message.reply(content=random.choice(EMBED_FAILS))
@@ -209,7 +216,7 @@ class MessageReactsCog(commands.Cog):
         return
     
 
-    def _link_is_an_embed_expection(self, message : str) -> bool:
+    def _link_is_an_embed_exception(self, message : str) -> bool:
         """
         Returns True if the given message has a link that is an exception
         for embed evaluations.

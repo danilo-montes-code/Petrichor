@@ -2,16 +2,17 @@
 
 Contains a class that manages the connection to the database.
 """
+from __future__ import annotations
+
+import os
 
 import asyncpg
 
 from util.printing import print_petrichor_msg, print_petrichor_error
 
-import os
-
-from asyncpg import Record
-from asyncpg.pool import PoolAcquireContext
-from asyncpg.exceptions import UniqueViolationError
+from typing import TYPE_CHECKING, Any
+if TYPE_CHECKING:
+    from asyncpg import Record, Connection
 
 
 
@@ -107,7 +108,7 @@ class DatabaseConnectionManager:
             'SELECT table_name '
             'FROM information_schema.tables '
             "WHERE table_schema = 'public' "
-            f"AND table_type='BASE TABLE'"
+            "AND table_type='BASE TABLE'"
         ))
         print_petrichor_msg(f"Tables: {[table['table_name'] for table in tables]}")
                 
@@ -116,7 +117,7 @@ class DatabaseConnectionManager:
         self, 
         table_name : str, 
         record_info : list
-    ) -> None:
+    ) -> bool:
         """
         Inserts a row into a given database. It is assumed that `record_info`
         contains properly formatted data—that is, each item in the list
@@ -129,22 +130,31 @@ class DatabaseConnectionManager:
             the name of the table to run the INSERT query
         record_info : list
             the data to insert into the table
+
+        Returns
+        -------
+        bool
+            True, if the row was successfully inserted |
+            False, if there was an error inserting the row
         """
 
         query = await self._generate_insert_query(table_name, record_info)
         result = await self._execute_query(query)
+        
         if not result:
             print_petrichor_error(f'Error inserting row into {table_name}')
-        else:
-            print_petrichor_msg(f'Row inserted into {table_name}')
+            return False
+        
+        print_petrichor_msg(f'Row inserted into {table_name}')
+        return True
 
 
     async def _get_table_column_info(
         self, 
         table_name : str
-    ) -> list[tuple[str, str]]:
+    ) -> list[Record]:
         """
-        Gets the name and datatype of every column in a given table.
+        Gets the name and relevant column metadata of every column in a given table.
 
         Parameters
         ----------
@@ -153,21 +163,16 @@ class DatabaseConnectionManager:
 
         Returns
         -------
-        list[tuple[str, str]]
-            a list of (column_name, data_type) tuples
+        list[Record]
+            a list of Records which contain relevant column metadata for each table column
         """
         
-        columns = await self._fetch_query((
-            'SELECT column_name, data_type '
+        return await self._fetch_query((
+            'SELECT column_name, data_type, is_identity, column_default '
             'FROM information_schema.columns '
             f"WHERE table_name = '{table_name}' "
             'ORDER BY ordinal_position;'
         ))
-
-        return [
-            (column['column_name'], column['data_type']) 
-            for column in columns
-        ]
 
 
     async def _generate_insert_query(
@@ -194,34 +199,42 @@ class DatabaseConnectionManager:
         
         table_column_info = await self._get_table_column_info(table_name)
 
-        columns = [
-            str(column_info[0]) 
-            for column_info 
-            in table_column_info
-            if column_info[1] != 'uuid'  # uuid column doesn't go in INSERT
-        ]
-
-        values = []
+        column_info : Record
+        columns : list[str] = []
+        values : list[Any] = []
         index = 0
         for column_info in table_column_info:
 
-            # skip uuid column, since this is automatically filled by PSQL
-            if column_info[1] == 'uuid':
+            # skip uuid column, since PSQL will auto-fill
+            if column_info['data_type'] == 'uuid':
                 continue
+
+            # skip identity columns, since PSQL will auto-fill
+            if column_info['is_identity'] == 'YES':
+                continue
+
+            # skip serial columns with defaults, since PSQL will auto-fill
+            if column_info['column_default'] is not None:
+                if 'nextval' in column_info['column_default']:
+                    continue
+
+
+            columns.append(str(column_info['column_name']))
             
             values.append(
                 self._wrap_data(
-                    data_type=column_info[1], 
+                    data_type=column_info['data_type'], 
                     data=str(record_info[index])
                 )
             )
             index += 1
             
 
-        return (
+        insert_query = (
             f'INSERT INTO {table_name} ({", ".join(columns)}) '
             f'VALUES ({", ".join(values)});'
         )
+        return insert_query
     
 
     def _wrap_data(self, data_type : str, data : str) -> str:
@@ -250,7 +263,7 @@ class DatabaseConnectionManager:
         # match self.PSQL_DATATYPE_MAP[data_type]:
         #     case 'str': return f"'{data}'"
         #     case 'int' | 'float' | 'bool': return data
-        #     case _: return 'NO DATA MAPPING'
+        #     case _: raise IndexError('NO DATA MAPPING')
         return f"'{data}'"
     
 
@@ -356,9 +369,9 @@ class DatabaseConnectionManager:
         """
 
         # make into lists if needed so .join() can work
-        if type(columns) == str:  columns = [columns]
-        if type(group_by) == str: group_by = [group_by]
-        if type(order_by) == str: order_by = [order_by]
+        if isinstance(columns, str):  columns = [columns]
+        if isinstance(group_by, str): group_by = [group_by]
+        if isinstance(order_by, str): order_by = [order_by]
         
         query = (
             f'SELECT {'DISTINCT' if distinct else ''}'
@@ -374,9 +387,9 @@ class DatabaseConnectionManager:
         return query
 
 
-    async def _fetch_query(self, query : str) -> list[Record]:
+    async def _fetch_query(self, query : str) -> list[Record] | None:
         """
-        Performs a query and returns its results.
+        Performs a fetch query and returns its results.
         
         Parameters
         ----------
@@ -386,18 +399,31 @@ class DatabaseConnectionManager:
         Returns
         -------
         list[Record]
-            the fetched rows
+            the fetched rows |
+            None, if there was an error when fetching the rows
         """
 
-        conn : PoolAcquireContext
+        print_petrichor_msg(f'Running fetch query: {query}')
+
+        result : list[Record] | None
+        conn : Connection
         async with self._db_pool.acquire() as conn:
             async with conn.transaction():
-                return await conn.fetch(query)
+                try: 
+                    result = await conn.fetch(query)
+
+                except Exception as e:
+                    print_petrichor_error(
+                        f'Error fetching rows with query {query}: {e}'
+                    )
+                    result = None
+            
+        return result
 
 
     async def _execute_query(self, query : str) -> str | None:
         """
-        Performs a query.
+        Executes am SQL query.
 
         Parameters
         ----------
@@ -407,17 +433,23 @@ class DatabaseConnectionManager:
         Return
         ------
         str
-            status of the SQL command | 
-            None, if the command was not executed
+            status of the executed SQL query | 
+            None, if there was an error when executing the query
         """
 
-        conn : PoolAcquireContext
+        print_petrichor_msg(f'Running execute query: {query}')
+
+        result = str | None
+        conn : Connection
         async with self._db_pool.acquire() as conn:
             async with conn.transaction():
                 try:
-                    return await conn.execute(query)
-                
-                except UniqueViolationError:
+                    result = await conn.execute(query)
+
+                except Exception as e:
                     print_petrichor_error(
-                        'Key value already exists'
+                        f'Error executing query {query}: {e}'
                     )
+                    result = None
+
+        return result

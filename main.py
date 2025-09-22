@@ -4,10 +4,11 @@
 The driver for the Petrichor bot.
 """
 
+import os
+import asyncio
+
 from Petrichor.PetrichorBot import PetrichorBot
 from util.db_connection_manager import DatabaseConnectionManager
-
-import os, asyncio
 
 
 
