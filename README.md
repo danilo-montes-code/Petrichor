@@ -15,6 +15,9 @@ Petrichor is a mutlipurpose Discord Bot for my server with my friends.
     * `game` - **(optional)** the game to search for, doesn't check for game by default (only works on clips sent as links)
     * `limit` - **(optional)** the maximum number of messages to search through, 100 by default
     * `skip` - **(optional)** the number of successfully found clips to skip over, 0 by default
+* `/euoh` commands - add and fetch a person's euoh counts
+    * `/euoh vc add` - add a VC Meuohment of a given type to a person
+    * `/euoh vc get` - get a person's VC Meuohment counts
 * `/pingus` - get the latency of the bot
 
 ## Useful Documentation / References
