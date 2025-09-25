@@ -38,9 +38,9 @@ EMBED_SUCCESSES = [
 ]
 
 EMBED_FAIL_EXCEPTIONS = [
-    'https://www.discord.com',
-    'https://www.instagram.com',
-    'https://www.discordapp.com'
+    'discord.com',
+    'instagram.com',
+    'discordapp.com'
 ]
 
 
