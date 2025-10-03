@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import datetime
 import random
+from zoneinfo import ZoneInfo
 
 from discord.ext import commands, tasks
 
@@ -22,13 +23,11 @@ if TYPE_CHECKING:
 
 
 EST_MIDNIGHT = datetime.time(
-                    hour=0, 
-                    minute=0, 
-                    second=0, 
-                    tzinfo=datetime.timezone(
-                        datetime.timedelta(hours=-5)
-                    )
-                )
+    hour=0, 
+    minute=0, 
+    second=0, 
+    tzinfo=ZoneInfo('America/New_York')
+)
 
 NAMES : list[str] = get_list('FRIENDS_NAMES')
 
@@ -69,6 +68,9 @@ class RecurringCog(commands.Cog):
         """
         Changes the name of the pinging channel to a random friend's name.
         """
+
+        await self.bot.wait_until_ready()
+
         channel : TextChannel = self.bot.get_channel(get_id('APEX_PINGING_ID'))
         
         old_name = new_name = channel.name.split('-')[1]
