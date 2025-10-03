@@ -6,6 +6,7 @@ Petrichor is a mutlipurpose Discord Bot for my server with my friends.
 * send messages from archive server to friend server channel (useful for game clips)
 * occassionally send responses to messages with embeds (and embed fails)
 * crazy? i was crazy once.
+* changes pinging channel to a random friend everyday at midnight
 
 ## Slash Commands
 * `/rtp` - "roll the ping", chooses a random active member and pings them

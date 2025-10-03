@@ -64,4 +64,41 @@ def get_dict(key : str) -> dict | None:
         print_petrichor_error('Could not decode JSON')
         
     return
-    
+
+
+def get_list(key : str) -> list | None:
+    """
+    Gets a list from the .env file with the given key, None if value is
+    not a list, or key does not exist.
+
+    Parameters
+    ----------
+    key : str
+        the key of the environment variable to search for
+
+    Returns
+    -------
+    list
+        the list that was obtained | 
+        None if value is not a list, or key does not exist
+    """
+
+    value = os.getenv(key)
+
+    if not value:
+        return None
+
+    try:
+        value = json.loads(value)
+
+        if type(value) is not list:
+            return
+
+        return value
+
+    except TypeError:
+        print_petrichor_error('Incorrect encoding for JSON')
+    except JSONDecodeError:
+        print_petrichor_error('Could not decode JSON')
+
+    return

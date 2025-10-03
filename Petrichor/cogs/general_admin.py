@@ -116,6 +116,7 @@ class AdminCog(commands.Cog):
             'event_handlers',
             'general_admin',
             'general_dev',
+            'recurring',
             # 'reminders',
             'roll_the_ping'
         ]
