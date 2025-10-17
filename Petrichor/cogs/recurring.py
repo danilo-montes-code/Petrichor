@@ -55,7 +55,7 @@ class RecurringCog(commands.Cog):
             bot that the commands belong to
         """
         self.bot = bot
-        self.change_pinging_channel_name.start()
+        # self.change_pinging_channel_name.start()
         print_petrichor_msg(
             'Task Started: change_pinging_channel_name | '
             'Runs: Daily | '
@@ -73,7 +73,7 @@ class RecurringCog(commands.Cog):
         """
         Runs when the cog is unloaded. Cancels the running tasks.
         """
-        self.change_pinging_channel_name.cancel()
+        # self.change_pinging_channel_name.cancel()
         self.change_grok_owner.cancel()
 
 
@@ -101,22 +101,58 @@ class RecurringCog(commands.Cog):
     @tasks.loop(time=EST_MIDNIGHT)
     async def change_grok_owner(self) -> None:
         """
-        Changes the grok role owner to a random friend.
+        Changes the @Grok role owner to a random friend.
         """
+
+        await self.bot.wait_until_ready()
+
+        kns_id = get_id('KNS_ID')
+        guild = self.bot.get_guild(kns_id) \
+                    or await self.bot.fetch_guild(kns_id)
+        grok_role_id = get_id('APEX_GROK_ROLE_ID')
+        grok_role = guild.get_role(grok_role_id) \
+                    or await guild.fetch_role(grok_role_id)
+        
+
+        async def choose_new_grok_member(
+            grok_role : Role,
+            id_list_to_choose_from : list[int]
+        ) -> None:
+            """
+            Chooses a new @Grok member from the friends list.
+            """
+
+            new_grok_member_id = random.choice(id_list_to_choose_from)
+            new_grok_member =   guild.get_member(new_grok_member_id) \
+                                or await guild.fetch_member(new_grok_member_id)
+            await new_grok_member.add_roles(grok_role)
+            print_petrichor_msg(f"Assigned @Grok role to {new_grok_member.name}")
+
+
+        async def remove_grok_member(
+            grok_role : Role,
+            member_id_to_remove : int
+        ) -> None:
+            """
+            Removes the @Grok role from the specified member.
+            """
+            
+            member_to_remove =  guild.get_member(member_id_to_remove) \
+                                or await guild.fetch_member(member_id_to_remove)
+            await member_to_remove.remove_roles(grok_role)
+            print_petrichor_msg(f"Removed @Grok role from {member_to_remove.name}")
+
 
         async def purge_multiple_groks() -> None:
             """
-            Removes grok role from multiple people if multiple people have it.
+            Removes @Grok role from multiple people if multiple people have it.
             """
-
-            guild = await self.bot.fetch_guild(get_id('KNS_ID'))
-            grok_role = await guild.fetch_role(get_id('APEX_GROK_ROLE_ID'))
 
             if not grok_role.members or len(grok_role.members) == 1:
                 return
             
             print_petrichor_msg(
-                "Multiple grok role owners detected, purging all but one."
+                "Multiple @Grok role owners detected, purging all but one."
             )
 
             one_member_kept = False
@@ -126,42 +162,10 @@ class RecurringCog(commands.Cog):
                     one_member_kept = True
                     continue
 
-                print_petrichor_msg(f"Removing from {member.name}")
-                await member.remove_roles(grok_role.id)
+                await remove_grok_member(grok_role, member.id)
 
-
-        async def choose_new_grok_member(
-            grok_role : Role,
-            id_list_to_choose_from : list[int]
-        ) -> None:
-            """
-            Chooses a new grok member from the friends list.
-            """
-            new_grok_member_id = random.choice(id_list_to_choose_from)
-            new_grok_member = await guild.fetch_member(new_grok_member_id)
-            await new_grok_member.add_roles(grok_role)
-            print_petrichor_msg(f"Assigned grok role to {new_grok_member.name}")
-
-
-        async def remove_grok_member(
-            grok_role : Role,
-            member_id_to_remove : int
-        ) -> None:
-            """
-            Removes the grok role from the specified member.
-            """
-            
-            member_to_remove = await guild.fetch_member(member_id_to_remove)
-            await member_to_remove.remove_roles(grok_role)
-            print_petrichor_msg(f"Removed grok role from {member_to_remove.name}")
-
-
-        await self.bot.wait_until_ready()
         
         await purge_multiple_groks()
-
-        guild = await self.bot.fetch_guild(get_id('KNS_ID'))
-        grok_role = await guild.fetch_role(get_id('APEX_GROK_ROLE_ID'))
 
         if not grok_role.members:
             await choose_new_grok_member(grok_role, list(FRIENDS.values()))
