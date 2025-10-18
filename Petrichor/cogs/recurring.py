@@ -55,7 +55,7 @@ class RecurringCog(commands.Cog):
             bot that the commands belong to
         """
         self.bot = bot
-        # self.change_pinging_channel_name.start()
+        self.change_pinging_channel_name.start()
         print_petrichor_msg(
             'Task Started: change_pinging_channel_name | '
             'Runs: Daily | '
@@ -73,7 +73,7 @@ class RecurringCog(commands.Cog):
         """
         Runs when the cog is unloaded. Cancels the running tasks.
         """
-        # self.change_pinging_channel_name.cancel()
+        self.change_pinging_channel_name.cancel()
         self.change_grok_owner.cancel()
 
 
