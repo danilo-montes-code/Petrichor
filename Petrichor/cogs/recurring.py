@@ -101,7 +101,6 @@ class RecurringCog(commands.Cog):
             f'Runs: {frequency} | '
             f'Time: {time}'
         )
-        
 
 
     @tasks.loop(time=EST_MIDNIGHT)

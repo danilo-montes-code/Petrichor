@@ -1,6 +1,6 @@
 """val.py
 
-Contains the Cog that holds commands related to valentine.
+Contains the Cog that holds commands related to kaeley.
 """
 from __future__ import annotations
 
@@ -43,16 +43,12 @@ SIDE_EYE_EMOTE_IDS = [
 SIDE_EYE_STICKER_IDS = [
     1335000085385318423
 ]
-VAL_ID : int = int(
-    get_dict('FRIEND_IDS')[
-        get_dict('FRIEND_NAMES')['VALENTINE']
-    ]
-)
+VAL_ID : int = int(get_dict('FRIEND_IDS')['KAELEY'])
 
 
 class ValCog(commands.Cog):
     """
-    Cog that holds commands related to valentine.
+    Cog that holds commands related to kaeley.
 
     Attributes
     ----------
@@ -112,23 +108,24 @@ class ValCog(commands.Cog):
             return
         
         inserted_successfully = await self.bot.db.insert_row(
-            table_name='val_side_eyes',
+            table_name='kaeley_side_eyes',
             record_info=[
-                reaction.message.id,
-                reaction.message.channel.id,
-                reaction.emoji.id,
-                False,
                 reaction.message.guild.id,
+                reaction.message.channel.id,
+                reaction.message.id,
+                reaction.emoji.id,
+                True,
+                False,
                 reaction.message.created_at
             ]
         )
 
         if not inserted_successfully:
-            print_petrichor_error('Failed to log valentine side eye emoji reaction.')
+            print_petrichor_error('Failed to log kaeley side eye emoji reaction.')
             return
 
         print_petrichor_msg(
-            f'Logged side eye emoji reaction from valentine with id {reaction.emoji.id}.'
+            f'Logged side eye emoji reaction from kaeley with id {reaction.emoji.id}.'
         )
     
 
@@ -137,7 +134,7 @@ class ValCog(commands.Cog):
         message : Message
     ) -> None:
         """
-        Checks if valentine sends a side eye emoji, and logs it if so.
+        Checks if kaeley sends a side eye emoji, and logs it if so.
 
         Parameters
         ----------
@@ -156,35 +153,37 @@ class ValCog(commands.Cog):
         
         if side_eye_emoji_id:
             inserted_successfully = await self.bot.db.insert_row(
-                table_name='val_side_eyes',
+                table_name='kaeley_side_eyes',
                 record_info=[
-                    message.id,
+                    message.guild.id,
                     message.channel.id,
+                    message.id,
                     side_eye_emoji_id,
                     True,
-                    message.guild.id,
+                    True,
                     message.created_at
                 ]
             )
         else:
             inserted_successfully = await self.bot.db.insert_row(
-                table_name='val_side_eyes',
+                table_name='kaeley_side_eyes',
                 record_info=[
-                    message.id,
-                    message.channel.id,
-                    side_eye_sticker_id,
-                    True,
                     message.guild.id,
+                    message.channel.id,
+                    message.id,
+                    side_eye_sticker_id,
+                    False,
+                    True,
                     message.created_at
                 ]
             )
 
         if not inserted_successfully:
-            print_petrichor_error('Failed to log valentine side eye emoji message.')
+            print_petrichor_error('Failed to log kaeley side eye emoji message.')
             return
         
         print_petrichor_msg(
-            f'Logged side eye emoji message from valentine with id {side_eye_emoji_id}.'
+            f'Logged side eye emoji message from kaeley with id {side_eye_emoji_id}.'
         )
 
 
@@ -248,7 +247,7 @@ class ValCog(commands.Cog):
     @app_commands.command(
         name='days-since-last-side-eye',
         description=(
-            'Gets the number of days since valentine last sent a '
+            'Gets the number of days since kaeley last sent a '
             'side eye emote or reaction.'
         )
     )
@@ -263,7 +262,7 @@ class ValCog(commands.Cog):
 
         if not last_side_eye:
             await interaction.response.send_message(
-                'Apparently val has never sent a side eye emote or reaction '
+                'Apparently kaeley has never sent a side eye emote or reaction '
                 'in this server (this simply can not be true)'
             )
             return
@@ -294,7 +293,7 @@ class ValCog(commands.Cog):
             f"{hours} hour{'s' if hours != 1 else ''}, "
             f"{minutes} minute{'s' if minutes != 1 else ''}, and "
             f"{seconds} second{'s' if seconds != 1 else ''} "
-            f"since valentine last sent a side eye emoji. "
+            f"since kaeley last sent a side eye emoji. "
             f"Evidence: {message.jump_url}"
         )
 
@@ -302,7 +301,7 @@ class ValCog(commands.Cog):
     @app_commands.command(
         name='longest-side-eye-drought',
         description=(
-            'Gets the longest number of days where valentine went '
+            'Gets the longest number of days where kaeley went '
             'without sending a side eye emote or reaction.'
             )
     )

@@ -90,7 +90,7 @@ class EventHandlersCog(commands.Cog):
         await self.ping_vc(message)
 
         await self.crazy_check(message)
-        await self.embed_evaluation(message)
+        # await self.embed_evaluation(message)
 
         await self.bot.process_commands(message)
 
