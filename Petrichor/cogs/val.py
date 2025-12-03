@@ -36,7 +36,11 @@ SIDE_EYE_EMOTE_IDS = [
     1411431528336195675,
     1417348512601083997,
     1417349672007106631,
-    1391935545676136508
+    1391935545676136508,
+    1355313823006986371
+]
+SIDE_EYE_STICKER_IDS = [
+    1335000085385318423
 ]
 VAL_ID : int = int(
     get_dict('FRIEND_IDS')[
@@ -110,6 +114,7 @@ class ValCog(commands.Cog):
             table_name='val_side_eyes',
             record_info=[
                 reaction.message.id,
+                reaction.message.channel.id,
                 reaction.emoji.id,
                 False,
                 reaction.message.guild.id,
@@ -142,28 +147,43 @@ class ValCog(commands.Cog):
         if message.author.id != VAL_ID:
             return
         
-        side_eye_id = self._side_eye_emoji_in_message(message.content)
+        side_eye_emoji_id = self._side_eye_emoji_in_message(message.content)
+        side_eye_sticker_id = self._side_eye_sticker_in_message(message.content)
 
-        if not side_eye_id:
+        if not side_eye_emoji_id and not side_eye_sticker_id:
             return
         
-        inserted_successfully = await self.bot.db.insert_row(
-            table_name='val_side_eyes',
-            record_info=[
-                message.id,
-                side_eye_id,
-                True,
-                message.guild.id,
-                message.created_at
-            ]
-        )
+        if side_eye_emoji_id:
+            inserted_successfully = await self.bot.db.insert_row(
+                table_name='val_side_eyes',
+                record_info=[
+                    message.id,
+                    message.channel.id,
+                    side_eye_emoji_id,
+                    True,
+                    message.guild.id,
+                    message.created_at
+                ]
+            )
+        else:
+            inserted_successfully = await self.bot.db.insert_row(
+                table_name='val_side_eyes',
+                record_info=[
+                    message.id,
+                    message.channel.id,
+                    side_eye_sticker_id,
+                    True,
+                    message.guild.id,
+                    message.created_at
+                ]
+            )
 
         if not inserted_successfully:
             print_petrichor_error('Failed to log valentine side eye emoji message.')
             return
         
         print_petrichor_msg(
-            f'Logged side eye emoji message from valentine with id {side_eye_id}.'
+            f'Logged side eye emoji message from valentine with id {side_eye_emoji_id}.'
         )
 
 
@@ -192,6 +212,33 @@ class ValCog(commands.Cog):
                 return emote_id
         
         return None
+    
+
+    def _side_eye_sticker_in_message(
+        self,
+        message : str
+    ) -> int | None:
+        """
+        Checks if a side eye sticker is in the message.
+
+        Parameters
+        ----------
+        message : str
+            the message to check
+
+        Returns
+        -------
+        int | None
+            id of the side eye sticker if found, 
+            otherwise None
+        """
+
+        for sticker_id in SIDE_EYE_STICKER_IDS:
+            emote_regex = re.compile(f'<:.*:{sticker_id}>')
+            if re.search(emote_regex, message):
+                return sticker_id
+
+        return None
 
 
     @app_commands.command(
@@ -218,6 +265,12 @@ class ValCog(commands.Cog):
             return
         
         last_side_eye = last_side_eye[0]
+
+        guild = self.bot.get_guild(interaction.guild_id) \
+                or await self.bot.fetch_guild(interaction.guild_id)
+        channel = guild.get_channel(last_side_eye['channel_id']) \
+                or await guild.fetch_channel(last_side_eye['channel_id'])
+        message = await channel.fetch_message(last_side_eye['message_id'])
         
         time_delta : timedelta = interaction.created_at - last_side_eye['message_time']
 
@@ -237,7 +290,8 @@ class ValCog(commands.Cog):
             f"{hours} hour{'s' if hours != 1 else ''}, "
             f"{minutes} minute{'s' if minutes != 1 else ''}, and "
             f"{seconds} second{'s' if seconds != 1 else ''} "
-            f"since valentine last sent a side eye emoji."
+            f"since valentine last sent a side eye emoji. "
+            f"Evidence: {message.jump_url}"
         )
 
     
