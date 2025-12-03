@@ -54,18 +54,17 @@ class RecurringCog(commands.Cog):
         bot : PetrichorBot
             bot that the commands belong to
         """
+        
         self.bot = bot
-        self.change_pinging_channel_name.start()
-        print_petrichor_msg(
-            'Task Started: change_pinging_channel_name | '
-            'Runs: Daily | '
-            f'Time: {EST_MIDNIGHT}'
+        self.start_task(
+            task_method=self.change_pinging_channel_name,
+            frequency='Daily',
+            time=EST_MIDNIGHT
         )
-        self.change_grok_owner.start()
-        print_petrichor_msg(
-            'Task Started: change_grok_owner | '
-            'Runs: Daily | '
-            f'Time: {EST_MIDNIGHT}'
+        self.start_task(
+            task_method=self.change_grok_owner,
+            frequency='Daily',
+            time=EST_MIDNIGHT
         )
 
     
@@ -75,6 +74,34 @@ class RecurringCog(commands.Cog):
         """
         self.change_pinging_channel_name.cancel()
         self.change_grok_owner.cancel()
+
+
+    def start_task(
+        self, 
+        task_method : tasks.Loop,
+        frequency: str,
+        time: datetime.time
+    ) -> None:
+        """
+        Waits until the bot is ready and then starts the given task.
+
+        Parameters
+        ----------
+        task_method : tasks.Loop
+            the task method to start
+        frequency : str
+            the frequency of the task
+        time: datetime.time
+            the time to run the task at
+        """
+
+        task_method.start()
+        print_petrichor_msg(
+            f'Task Started: {task_method._name.split('.')[1]} | '
+            f'Runs: {frequency} | '
+            f'Time: {time}'
+        )
+        
 
 
     @tasks.loop(time=EST_MIDNIGHT)
@@ -168,6 +195,9 @@ class RecurringCog(commands.Cog):
         await purge_multiple_groks()
 
         if not grok_role.members:
+            print_petrichor_msg(
+                "No current @Grok role owner, choosing a new one."
+            )
             await choose_new_grok_member(grok_role, list(FRIENDS.values()))
             return
 

@@ -8,16 +8,16 @@ import random
 import asyncio
 
 from discord.ext import commands
+from discord import VoiceChannel
 
 from util.env_vars import get_id, get_dict
-
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from discord import (
         Message, 
         Member,
-        Role
+        Role,
     )
 
     from Petrichor.PetrichorBot import PetrichorBot
@@ -45,7 +45,7 @@ EMBED_FAIL_EXCEPTIONS = [
 
 
 
-class MessageReactsCog(commands.Cog):
+class EventHandlersCog(commands.Cog):
     """
     Cog that manages message reactions.
 
@@ -87,6 +87,7 @@ class MessageReactsCog(commands.Cog):
             return
 
         await self.repost_game_clips(message)
+        await self.ping_vc(message)
 
         await self.crazy_check(message)
         await self.embed_evaluation(message)
@@ -271,6 +272,45 @@ class MessageReactsCog(commands.Cog):
         await self.post_to_pov(text_to_send)
 
 
+    async def ping_vc(
+        self,
+        message : Message,
+    ) -> None:
+        """
+        Replaces an instance of @vc with a ping to all the users in
+        the voice chat.
+        
+        Parameters
+        ----------
+        message : str
+            the message to process
+        """
+
+        if not isinstance(message.channel, VoiceChannel):
+            return
+        
+        if '@vc' not in message.content.lower():
+            return
+        
+        members_in_vc = message.channel.members
+        if not members_in_vc:
+            await message.reply(
+                content=(
+                    'Voice channel is empty, "@vc" command only works '
+                    'when there are people in the voice channel.'
+                ),
+                mention_author=True
+            )
+            return
+        
+        mentions = ' '.join(member.mention for member in members_in_vc)
+
+        await message.reply(
+            content=message.content.replace("@vc", mentions),
+            mention_author=False
+        )
+
+
     def _replace_name_with_id(self, message : str) -> str:
         """
         Replaces the name with the direct @ of the user.
@@ -355,4 +395,4 @@ async def setup(bot : commands.Bot) -> None:
     bot : commands.Bot
         the bot to add the cog to
     """
-    await bot.add_cog(MessageReactsCog(bot))
+    await bot.add_cog(EventHandlersCog(bot))
