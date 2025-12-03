@@ -18,7 +18,8 @@ if TYPE_CHECKING:
         Interaction,
         Message,
         Reaction,
-        User
+        User,
+        StickerItem
     )
     from asyncpg import Record
 
@@ -148,7 +149,7 @@ class ValCog(commands.Cog):
             return
         
         side_eye_emoji_id = self._side_eye_emoji_in_message(message.content)
-        side_eye_sticker_id = self._side_eye_sticker_in_message(message.content)
+        side_eye_sticker_id = self._side_eye_sticker_in_message(message)
 
         if not side_eye_emoji_id and not side_eye_sticker_id:
             return
@@ -216,14 +217,14 @@ class ValCog(commands.Cog):
 
     def _side_eye_sticker_in_message(
         self,
-        message : str
+        message : Message
     ) -> int | None:
         """
         Checks if a side eye sticker is in the message.
 
         Parameters
         ----------
-        message : str
+        message : Message
             the message to check
 
         Returns
@@ -233,10 +234,13 @@ class ValCog(commands.Cog):
             otherwise None
         """
 
-        for sticker_id in SIDE_EYE_STICKER_IDS:
-            emote_regex = re.compile(f'<:.*:{sticker_id}>')
-            if re.search(emote_regex, message):
-                return sticker_id
+        if not message.stickers:
+            return None
+        
+        sticker : StickerItem
+        for sticker in message.stickers:
+            if sticker.id in SIDE_EYE_STICKER_IDS:
+                return sticker.id
 
         return None
 
