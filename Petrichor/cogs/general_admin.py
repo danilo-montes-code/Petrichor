@@ -118,7 +118,8 @@ class AdminCog(commands.Cog):
             'general_dev',
             'recurring',
             # 'reminders',
-            'roll_the_ping'
+            'roll_the_ping',
+            'val'
         ]
     ) -> None:
         """
