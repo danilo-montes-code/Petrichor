@@ -41,3 +41,26 @@ CREATE TABLE IF NOT EXISTS vc_euohs(
     ping_time TIMESTAMPTZ
 );
 ```
+
+## `val_side_eyes` Table
+Used to hold the occurrences of valentine reacting with or messaging a side eye emoji.
+
+```sql
+CREATE TABLE IF NOT EXISTS kaeley_side_eyes(
+    side_eye_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    guild_id VARCHAR(20),
+    channel_id VARCHAR(20),
+    message_id VARCHAR(20),
+    emoji_id VARCHAR(20),
+    media_type BOOLEAN,
+    message_type BOOLEAN,
+    message_time TIMESTAMPTZ
+);
+```
+`media_type` : `boolean`
+- true for Emoji
+- false for Sticker
+
+`message_type` : `boolean`
+- true for TextMessage
+- false for Reaction

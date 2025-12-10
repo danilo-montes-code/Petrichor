@@ -1,4 +1,4 @@
-"""eouh.py
+"""euoh.py
 
 Contains the Cog that holds commands for euoh-related commands.
 """

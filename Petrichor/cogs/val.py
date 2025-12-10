@@ -11,6 +11,8 @@ from util.env_vars import get_dict
 from util.printing import print_petrichor_msg, print_petrichor_error
 
 import re
+from datetime import datetime
+from datetime import timedelta
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -24,8 +26,6 @@ if TYPE_CHECKING:
     from asyncpg import Record
 
     from Petrichor.PetrichorBot import PetrichorBot
-
-    from datetime import timedelta
 
 
 SIDE_EYE_EMOTE_IDS = [
@@ -44,6 +44,7 @@ SIDE_EYE_STICKER_IDS = [
     1335000085385318423
 ]
 VAL_ID : int = int(get_dict('FRIEND_IDS')['KAELEY'])
+DATETIME_FORMAT : str = '%Y-%m-%d %H:%M:%S.%f%z'
 
 
 class ValCog(commands.Cog):
@@ -244,16 +245,31 @@ class ValCog(commands.Cog):
         return None
 
 
-    @app_commands.command(
+    kaeley = app_commands.Group(
+        name='kaeley',
+        description='Commands related to kaeley'
+    )
+
+
+    @kaeley.command(
         name='days-since-last-side-eye',
         description=(
             'Gets the number of days since kaeley last sent a '
-            'side eye emote or reaction.'
+            'side eye emoji, sticker, or reaction.'
         )
     )
-    async def days_since_last_side_eye(self, interaction : Interaction):
+    async def days_since_last_side_eye(self, interaction : Interaction) -> None:
+        """
+        Gets the time since kaeley sent a side eye reaction.
+        
+        Parameters
+        ----------
+        interaction : Interaction
+            interaction that triggered the command
+        """
+
         last_side_eye : Record = await self.bot.db.fetch_rows(
-            table_name='val_side_eyes',
+            table_name='kaeley_side_eyes',
             where=f"guild_id = '{interaction.guild_id}'",
             order_by='message_time',
             order_by_ascending=False,
@@ -262,7 +278,7 @@ class ValCog(commands.Cog):
 
         if not last_side_eye:
             await interaction.response.send_message(
-                'Apparently kaeley has never sent a side eye emote or reaction '
+                'Apparently kaeley has never sent a side eye emoji, sticker, or reaction '
                 'in this server (this simply can not be true)'
             )
             return
@@ -277,9 +293,113 @@ class ValCog(commands.Cog):
         
         time_delta : timedelta = interaction.created_at - last_side_eye['message_time']
 
-        days = time_delta.days
+        formatted_td = self._format_timedelta(time_delta)
 
-        td_seconds = time_delta.seconds
+        await interaction.response.send_message(
+            f"It has been {formatted_td} "
+            "since kaeley last sent a side eye emoji. "
+            f"Evidence: {message.jump_url}"
+        )
+
+    
+    @kaeley.command(
+        name='total-side-eye-count',
+        description=(
+            'Gets the number of times kaeley reacted with a '
+            'side eye (since this counting started).'
+        )
+    )
+    async def total_side_eye_count(self, interaction : Interaction) -> None:
+        """
+        Gets the count of side eye reactions that kaeley has sent.
+
+        Parameters
+        ----------
+        interaction : Interaction
+            interaction that triggered the command
+        """
+
+        side_eye_list : list[Record] = await self.bot.db.fetch_rows(
+            table_name='kaeley_side_eyes',
+            where=f"guild_id = '{interaction.guild_id}'"
+        )
+
+        side_eye_count : int = len(side_eye_list)
+
+        await interaction.response.send_message(
+            f'kaeley has sent a total of {side_eye_count} '
+            f'side eye{"s" if side_eye_count != 1 else ""} in this server.'
+        )
+
+
+    @kaeley.command(
+        name='longest-side-eye-drought',
+        description=(
+            'Gets the longest number of days where kaeley went '
+            'without sending a side eye emote or reaction.'
+        )
+    )
+    async def longest_side_eye_drought(self, interaction : Interaction) -> None:
+        """
+        Gets the longest drought of side eye reactions from kaeley.
+
+        Parameters
+        ----------
+        interaction : Interaction
+            interaction that triggered the command
+        """
+
+        side_eye_list : list[Record] = await self.bot.db.fetch_rows(
+            table_name='kaeley_side_eyes',
+            where=f"guild_id = '{interaction.guild_id}'",
+            order_by='message_time', 
+            order_by_ascending=True
+        )
+
+        longest_drought = timedelta(seconds=0)
+        
+        for i, side_eye_record in enumerate(side_eye_list):
+
+            if i == 0:
+                continue
+
+            second = f'{side_eye_record['message_time']}'
+            first = f'{side_eye_list[i - 1]['message_time']}'
+
+            first_dt = datetime.strptime(f'{first}', DATETIME_FORMAT)
+            second_dt = datetime.strptime(f'{second}', DATETIME_FORMAT)
+
+            current_drought = second_dt - first_dt
+            
+            longest_drought = max(longest_drought, current_drought)
+
+
+        longest_drought = max(longest_drought, interaction.created_at - second_dt)
+
+        await interaction.response.send_message(
+            f'The longest side eye drought kaeley has had in this server is '
+            f'{self._format_timedelta(longest_drought)}.'
+        )
+
+
+    def _format_timedelta(self, td : timedelta) -> str:
+        """
+        Formats a timedelta into a human readable string.
+
+        Parameters
+        ----------
+        td : timedelta
+            the timedelta to format
+
+        Returns
+        -------
+        str
+            the formatted timedelta
+        """
+
+        days = td.days
+
+        td_seconds = td.seconds
         seconds = td_seconds % 60
         minutes = td_seconds // 60
 
@@ -287,27 +407,11 @@ class ValCog(commands.Cog):
         minutes = td_seconds % 60
         hours = td_seconds // 60
 
-        await interaction.response.send_message(
-            f"It has been "
+        return (
             f"{days} day{'s' if days != 1 else ''}, "
             f"{hours} hour{'s' if hours != 1 else ''}, "
             f"{minutes} minute{'s' if minutes != 1 else ''}, and "
-            f"{seconds} second{'s' if seconds != 1 else ''} "
-            f"since kaeley last sent a side eye emoji. "
-            f"Evidence: {message.jump_url}"
-        )
-
-    
-    @app_commands.command(
-        name='longest-side-eye-drought',
-        description=(
-            'Gets the longest number of days where kaeley went '
-            'without sending a side eye emote or reaction.'
-            )
-    )
-    async def longest_side_eye_drought(self, interaction : Interaction):
-        await interaction.response.send_message(
-            "soon... (tm)"
+            f"{seconds} second{'s' if seconds != 1 else ''}"
         )
 
 

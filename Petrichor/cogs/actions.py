@@ -10,7 +10,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from util.printing import print_petrichor_error
-from util.env_vars import get_id
+from util.env_vars import get_id, get_dict
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -269,6 +269,87 @@ class ActionsCog(commands.Cog):
         False,  otherwise
         """
         return game.replace(' ', '-') in link
+
+
+    @app_commands.command(
+        name='dailies',
+        description='Gets the links to common dailies that we do.'
+    )
+    async def dailies(self, interaction : Interaction) -> None:
+        """
+        Displays the links to common dailies that we do.
+        
+        Parameters
+        ----------
+        interaction : Interaction
+            the interaction that evoked the command
+        """
+
+        await interaction.response.send_message(
+            content=(
+                f'**Duolingo**: <@{get_dict('FRIEND_IDS')['MAX']}> thoughts?\n'
+                '**Wordle**: Discord activity (`/wordle`)\n'
+                '**Bandle**: https://bandle.app/menu\n'
+                '**Gamedle**: https://www.gamedle.wtf/guess#\n'
+                '**Apex**:\n'
+                '- guess the character: https://thevalber.github.io/apexdle/classic\n'
+                '- guess the rank: https://rankdle.com/games/apex\n'
+                '**Overwatch**:\n'
+                '- guess the character: https://owdle.guessing.day/\n'
+                '- guess the rank: https://rankdle.com/games/ow2\n'
+                '**Pokedle**: https://pokedle.io/\n'
+                '**Smashdle**: https://smashdle.net/classic\n'
+                '**Tekkendle**: https://tekkendle.net/'
+            ),
+            suppress_embeds=True
+        )
+
+
+    @app_commands.command(
+        name='help',
+        description='Displays a list of commands that the bot can perform.'
+    )
+    async def help(self, interaction : Interaction) -> None:
+        """
+        Displays a list of commands that the bot can perform.
+        
+        Parameters
+        ----------
+        interaction : Interaction
+            the interaction that evoked the command
+        """
+
+        await interaction.response.send_message(
+            content=(
+                '# Petrichor Commands\n'
+                '## euoh Commands\n'
+                '* `/euoh vc add <euoh_recipient> <euoh_type>` - add a VC Meuohment of a given type to a person\n'
+                '* `/euoh vc get <euoh_recipient>` - get a person\'s VC Meuohment counts\n'
+                '## rtp Commands\n'
+                '* `/rtp` - "roll the ping", chooses a random active member and pings them\n'
+                '* `/ping-counts perpetrator` - show a ranking of `/rtp` command runners\n'
+                '* `/ping-counts victim` - show a ranking of `/rtp` command receivers\n'
+                '## kaeley Commands\n'
+                '* `/kaeley days-since-last-side-eye` - get the time since kaeley\'s last side eye reaction\n'
+                '* `/kaeley longest-side-eye-drought` - get the longest number of days where kaeley didn\'t react with a side eye\n'
+                '* `/kaeley total-side-eye-count` - get the total number of side eye reactions kaeley has made\n'
+                '## Assorted Commands\n'
+                '* `/dailies`: get the links to common dailies that we do\n'
+                '* `/last-clip`: get the link of the last clip that the user posted in the POV channel\n'
+                '  * `game` - **(optional)** the game to search for, doesn\'t check for game by default (only works on clips sent as links)\n'
+                '  * `limit` - **(optional)** the maximum number of messages to search through, 100 by default\n'
+                '  * `skip` - **(optional)** the number of successfully found clips to skip over, 0 by default\n'
+                '* `/pingus`: get the latency of the bot\n'
+                '* `/help`: display this message\n'
+                '# Petrichor Functions\n'
+                '* repost game clips to the `#pov-ur-bad` channel\n'
+                '* change pinging channel to a random friend everyday at midnight\n'
+                '* change @Grok role owner to a random friend everyday at midnight\n'
+                '* **[DISABLED]** occassionally send responses to messages with embeds (and embed fails)\n'
+                '* **[DISABLED]** crazy? i was crazy once.'
+            ),
+            suppress_embeds=True
+        )
 
 
 
