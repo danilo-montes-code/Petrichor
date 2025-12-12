@@ -322,9 +322,11 @@ class ActionsCog(commands.Cog):
         await interaction.response.send_message(
             content=(
                 '# Petrichor Commands\n'
-                '## euoh Commands\n'
-                '* `/euoh vc add <euoh_recipient> <euoh_type>` - add a VC Meuohment of a given type to a person\n'
-                '* `/euoh vc get <euoh_recipient>` - get a person\'s VC Meuohment counts\n'
+                '## Euoh Commands\n'
+                '_Currently available Euoh categories: `vc`, `apex`_\n'
+                '* `/euoh <euoh_category> add <euoh_recipient> <euoh_type>` - add an euoh of a certain category of a given type to a person\n'
+                '* `/euoh <euoh_category> get <euoh_recipient>` - get a person\'s euoh counts in a given category\n'
+                '* `/euoh <euoh_category> info` - get detailed information about euohs in a given euoh category\n'
                 '## rtp Commands\n'
                 '* `/rtp` - "roll the ping", chooses a random active member and pings them\n'
                 '* `/ping-counts perpetrator` - show a ranking of `/rtp` command runners\n'
@@ -345,10 +347,10 @@ class ActionsCog(commands.Cog):
                 '* repost game clips to the `#pov-ur-bad` channel\n'
                 '* change pinging channel to a random friend everyday at midnight\n'
                 '* change @Grok role owner to a random friend everyday at midnight\n'
+                '* type @vc in a Voice Channel\'s text chat to automatically ping everyone currently in VC\n'
                 '* **[DISABLED]** occassionally send responses to messages with embeds (and embed fails)\n'
                 '* **[DISABLED]** crazy? i was crazy once.'
-            ),
-            suppress_embeds=True
+            )
         )
 
 

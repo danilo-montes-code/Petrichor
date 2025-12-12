@@ -224,7 +224,7 @@ class DatabaseConnectionManager:
             values.append(
                 self._wrap_data(
                     data_type=column_info['data_type'], 
-                    data=str(record_info[index])
+                    data=record_info[index]
                 )
             )
             index += 1
@@ -264,6 +264,10 @@ class DatabaseConnectionManager:
         #     case 'str': return f"'{data}'"
         #     case 'int' | 'float' | 'bool': return data
         #     case _: raise IndexError('NO DATA MAPPING')
+        
+        if data is None: return 'NULL'
+
+        data = str(data)
         return f"'{data}'"
     
 

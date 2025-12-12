@@ -1,7 +1,9 @@
 # ERD for Petrichor Database
 ![ERD for Petrichor database](PetrichorERD.png)
 
+
 # Database Schema
+
 
 ## `users` Table
 Used to hold data relating to the users of the bot.
@@ -28,8 +30,10 @@ CREATE TABLE IF NOT EXISTS roll_the_pings(
 ```
 
 
-## `euoh` Tables
-Used to hold the results of all instances of `/euoh <type>` used.
+## `euohs` Tables
+
+### `vc_euoh` Table
+Used to hold the results of all instances of `/euoh vc` used.
 
 ```sql
 CREATE TABLE IF NOT EXISTS vc_euohs(
@@ -42,8 +46,24 @@ CREATE TABLE IF NOT EXISTS vc_euohs(
 );
 ```
 
-## `val_side_eyes` Table
-Used to hold the occurrences of valentine reacting with or messaging a side eye emoji.
+### `apex_euoh` Table
+Used to hold the results of all instances of `/euoh apex` used.
+
+```sql
+CREATE TABLE IF NOT EXISTS apex_euohs(
+    apex_euoh_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    recipient_id VARCHAR(20) REFERENCES users(user_id),
+    euoh_type TEXT,
+    reporter_id VARCHAR(20) REFERENCES users(user_id),
+    guild_id VARCHAR(20),
+    ping_time TIMESTAMPTZ,
+    evidence_link TEXT
+);
+```
+
+
+## `kaeley_side_eyes` Table
+Used to hold the occurrences of kaeley reacting with or messaging a side eye emoji.
 
 ```sql
 CREATE TABLE IF NOT EXISTS kaeley_side_eyes(
