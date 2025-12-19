@@ -89,7 +89,7 @@ class EventHandlersCog(commands.Cog):
         await self.repost_game_clips(message)
         await self.ping_vc(message)
 
-        await self.crazy_check(message)
+        # await self.crazy_check(message)
         # await self.embed_evaluation(message)
 
         await self.bot.process_commands(message)
