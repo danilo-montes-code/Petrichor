@@ -5,6 +5,7 @@ Contains the Cog that holds commands that perform actions.
 from __future__ import annotations
 
 import pathlib
+import textwrap
 
 from discord import app_commands, Role
 from discord.ext import commands
@@ -31,6 +32,47 @@ GAME_CLIP_LINKS = (
     'https://youtu.be',
     'https://cdn.steamusercontent.com'
 )
+
+HELP_MESSAGES = [
+    textwrap.dedent("""\
+        # Petrichor Commands
+
+        ## Euoh Commands 
+        _Currently available Euoh categories: `vc`, `apex`_
+        * `/euoh <euoh_category> add <euoh_recipient> <euoh_type>` - add an euoh of a certain category of a given type to a person
+        * `/euoh <euoh_category> get <euoh_recipient>` - get a person\'s euoh counts in a given category
+        * `/euoh <euoh_category> info` - get detailed information about euohs in a given euoh category
+
+        ## rtp Commands
+        * `/rtp` - "roll the ping", chooses a random active member and pings them
+        * `/ping-counts perpetrator` - show a ranking of `/rtp` command runners
+        * `/ping-counts victim` - show a ranking of `/rtp` command receivers
+
+        ## kaeley Commands
+        * `/kaeley days-since-last-side-eye` - get the time since kaeley\'s last side eye reaction
+        * `/kaeley longest-side-eye-drought` - get the longest number of days where kaeley didn\'t react with a side eye
+        * `/kaeley total-side-eye-count` - get the total number of side eye reactions kaeley has made
+
+        ## Assorted Commands
+        * `/dailies`: get the links to common dailies that we do
+        * `/last-clip`: get the link of the last clip that the user posted in the POV channel
+        * `game` - **(optional)** the game to search for, doesn\'t check for game by default (only works on clips sent as links)
+        * `limit` - **(optional)** the maximum number of messages to search through, 100 by default
+        * `skip` - **(optional)** the number of successfully found clips to skip over, 0 by default
+        * `/get-role-members`: list the members that have a given role
+        * `/pingus`: get the latency of the bot
+        * `/help`: display this message
+    """),
+    textwrap.dedent("""\
+        # Petrichor Functions
+        * repost game clips to the `#pov-ur-bad` channel
+        * change pinging channel to a random friend everyday at midnight
+        * change @Grok role owner to a random friend everyday at midnight
+        * type @vc in a Voice Channel\'s text chat to automatically ping everyone currently in VC
+        * **[DISABLED]** occassionally send responses to messages with embeds (and embed fails)
+        * **[DISABLED]** crazy? i was crazy once
+    """)
+]
 
 
 
@@ -337,7 +379,6 @@ class ActionsCog(commands.Cog):
             )
         )
 
-
     @app_commands.command(
         name='help',
         description='Displays a list of commands that the bot can perform.'
@@ -352,39 +393,12 @@ class ActionsCog(commands.Cog):
             the interaction that evoked the command
         """
 
+        await interaction.channel.send(content=HELP_MESSAGES[0])
+        await interaction.channel.send(content=HELP_MESSAGES[1])
+
         await interaction.response.send_message(
-            content="""\
-            # Petrichor Commands
-            ## Euoh Commands
-            _Currently available Euoh categories: `vc`, `apex`_
-            * `/euoh <euoh_category> add <euoh_recipient> <euoh_type>` - add an euoh of a certain category of a given type to a person
-            * `/euoh <euoh_category> get <euoh_recipient>` - get a person\'s euoh counts in a given category
-            * `/euoh <euoh_category> info` - get detailed information about euohs in a given euoh category
-            ## rtp Commands
-            * `/rtp` - "roll the ping", chooses a random active member and pings them
-            * `/ping-counts perpetrator` - show a ranking of `/rtp` command runners
-            * `/ping-counts victim` - show a ranking of `/rtp` command receivers
-            ## kaeley Commands
-            * `/kaeley days-since-last-side-eye` - get the time since kaeley\'s last side eye reaction
-            * `/kaeley longest-side-eye-drought` - get the longest number of days where kaeley didn\'t react with a side eye
-            * `/kaeley total-side-eye-count` - get the total number of side eye reactions kaeley has made
-            ## Assorted Commands
-            * `/dailies`: get the links to common dailies that we do
-            * `/last-clip`: get the link of the last clip that the user posted in the POV channel
-              * `game` - **(optional)** the game to search for, doesn\'t check for game by default (only works on clips sent as links)
-              * `limit` - **(optional)** the maximum number of messages to search through, 100 by default
-              * `skip` - **(optional)** the number of successfully found clips to skip over, 0 by default
-            * `/get-role-members`: list the members that have a given role
-            * `/pingus`: get the latency of the bot
-            * `/help`: display this message
-            # Petrichor Functions
-            * repost game clips to the `#pov-ur-bad` channel
-            * change pinging channel to a random friend everyday at midnight
-            * change @Grok role owner to a random friend everyday at midnight
-            * type @vc in a Voice Channel\'s text chat to automatically ping everyone currently in VC
-            * **[DISABLED]** occassionally send responses to messages with embeds (and embed fails)
-            * **[DISABLED]** crazy? i was crazy once
-            """
+            content="Help message shown below.", 
+            ephemeral=True
         )
 
 

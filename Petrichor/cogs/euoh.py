@@ -229,7 +229,7 @@ class EuohCog(commands.Cog):
 
     @apex_euoh.command(
         name='add', 
-        description='Adds an Apex euoh to the person mentioned'
+        description='Adds an Apex euoh to the person mentioned.'
     )
     async def apex_euohs_add(
         self,
