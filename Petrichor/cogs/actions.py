@@ -56,9 +56,9 @@ HELP_MESSAGES = [
         ## Assorted Commands
         * `/dailies`: get the links to common dailies that we do
         * `/last-clip`: get the link of the last clip that the user posted in the POV channel
-            * `game` - **(optional)** the game to search for, doesn\'t check for game by default (only works on clips sent as links)
-            * `limit` - **(optional)** the maximum number of messages to search through, 100 by default
-            * `skip` - **(optional)** the number of successfully found clips to skip over, 0 by default
+          * `game` - **(optional)** the game to search for, doesn\'t check for game by default (only works on clips sent as links)
+          * `limit` - **(optional)** the maximum number of messages to search through, 100 by default
+          * `skip` - **(optional)** the number of successfully found clips to skip over, 0 by default
         * `/get-role-members`: list the members that have a given role
         * `/pingus`: get the latency of the bot
         * `/help`: display this message
