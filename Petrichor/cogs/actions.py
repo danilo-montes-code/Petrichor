@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import pathlib
 
-from discord import app_commands
+from discord import app_commands, Role
 from discord.ext import commands
 
 from util.printing import print_petrichor_error
@@ -306,6 +306,39 @@ class ActionsCog(commands.Cog):
 
 
     @app_commands.command(
+        name='get-role-members',
+        description='Lists the server members that have the given role.'
+    )
+    async def get_role_members(
+        self, 
+        interaction : Interaction, 
+        role : Role
+    ) -> None:
+        """
+        Lists the server members that have the given role.
+
+        Parameters
+        ----------
+        interaction : Interaction
+            the interaction that evoked the command
+        role : Role
+            the role to get the members of
+        """
+
+        if not role.members:
+            await interaction.response.send_message(
+                content=f'No members with the "{role.name}" role found.'
+            )
+            return
+
+        await interaction.response.send_message(
+            content=f'Members with the "{role.name}" role:\n- ' + '\n- '.join(
+                member.display_name for member in role.members
+            )
+        )
+
+
+    @app_commands.command(
         name='help',
         description='Displays a list of commands that the bot can perform.'
     )
@@ -320,37 +353,38 @@ class ActionsCog(commands.Cog):
         """
 
         await interaction.response.send_message(
-            content=(
-                '# Petrichor Commands\n'
-                '## Euoh Commands\n'
-                '_Currently available Euoh categories: `vc`, `apex`_\n'
-                '* `/euoh <euoh_category> add <euoh_recipient> <euoh_type>` - add an euoh of a certain category of a given type to a person\n'
-                '* `/euoh <euoh_category> get <euoh_recipient>` - get a person\'s euoh counts in a given category\n'
-                '* `/euoh <euoh_category> info` - get detailed information about euohs in a given euoh category\n'
-                '## rtp Commands\n'
-                '* `/rtp` - "roll the ping", chooses a random active member and pings them\n'
-                '* `/ping-counts perpetrator` - show a ranking of `/rtp` command runners\n'
-                '* `/ping-counts victim` - show a ranking of `/rtp` command receivers\n'
-                '## kaeley Commands\n'
-                '* `/kaeley days-since-last-side-eye` - get the time since kaeley\'s last side eye reaction\n'
-                '* `/kaeley longest-side-eye-drought` - get the longest number of days where kaeley didn\'t react with a side eye\n'
-                '* `/kaeley total-side-eye-count` - get the total number of side eye reactions kaeley has made\n'
-                '## Assorted Commands\n'
-                '* `/dailies`: get the links to common dailies that we do\n'
-                '* `/last-clip`: get the link of the last clip that the user posted in the POV channel\n'
-                '  * `game` - **(optional)** the game to search for, doesn\'t check for game by default (only works on clips sent as links)\n'
-                '  * `limit` - **(optional)** the maximum number of messages to search through, 100 by default\n'
-                '  * `skip` - **(optional)** the number of successfully found clips to skip over, 0 by default\n'
-                '* `/pingus`: get the latency of the bot\n'
-                '* `/help`: display this message\n'
-                '# Petrichor Functions\n'
-                '* repost game clips to the `#pov-ur-bad` channel\n'
-                '* change pinging channel to a random friend everyday at midnight\n'
-                '* change @Grok role owner to a random friend everyday at midnight\n'
-                '* type @vc in a Voice Channel\'s text chat to automatically ping everyone currently in VC\n'
-                '* **[DISABLED]** occassionally send responses to messages with embeds (and embed fails)\n'
-                '* **[DISABLED]** crazy? i was crazy once.'
-            )
+            content="""\
+            # Petrichor Commands
+            ## Euoh Commands
+            _Currently available Euoh categories: `vc`, `apex`_
+            * `/euoh <euoh_category> add <euoh_recipient> <euoh_type>` - add an euoh of a certain category of a given type to a person
+            * `/euoh <euoh_category> get <euoh_recipient>` - get a person\'s euoh counts in a given category
+            * `/euoh <euoh_category> info` - get detailed information about euohs in a given euoh category
+            ## rtp Commands
+            * `/rtp` - "roll the ping", chooses a random active member and pings them
+            * `/ping-counts perpetrator` - show a ranking of `/rtp` command runners
+            * `/ping-counts victim` - show a ranking of `/rtp` command receivers
+            ## kaeley Commands
+            * `/kaeley days-since-last-side-eye` - get the time since kaeley\'s last side eye reaction
+            * `/kaeley longest-side-eye-drought` - get the longest number of days where kaeley didn\'t react with a side eye
+            * `/kaeley total-side-eye-count` - get the total number of side eye reactions kaeley has made
+            ## Assorted Commands
+            * `/dailies`: get the links to common dailies that we do
+            * `/last-clip`: get the link of the last clip that the user posted in the POV channel
+              * `game` - **(optional)** the game to search for, doesn\'t check for game by default (only works on clips sent as links)
+              * `limit` - **(optional)** the maximum number of messages to search through, 100 by default
+              * `skip` - **(optional)** the number of successfully found clips to skip over, 0 by default
+            * `/get-role-members`: list the members that have a given role
+            * `/pingus`: get the latency of the bot
+            * `/help`: display this message
+            # Petrichor Functions
+            * repost game clips to the `#pov-ur-bad` channel
+            * change pinging channel to a random friend everyday at midnight
+            * change @Grok role owner to a random friend everyday at midnight
+            * type @vc in a Voice Channel\'s text chat to automatically ping everyone currently in VC
+            * **[DISABLED]** occassionally send responses to messages with embeds (and embed fails)
+            * **[DISABLED]** crazy? i was crazy once
+            """
         )
 
 
