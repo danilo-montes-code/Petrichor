@@ -59,7 +59,7 @@ HELP_MESSAGES = [
           * `game` - **(optional)** the game to search for, doesn\'t check for game by default (only works on clips sent as links)
           * `limit` - **(optional)** the maximum number of messages to search through, 100 by default
           * `skip` - **(optional)** the number of successfully found clips to skip over, 0 by default
-        * `/get-role-members`: list the members that have a given role
+        * `/who-has`: list the members that have a given role
         * `/pingus`: get the latency of the bot
         * `/help`: display this message
     """),
@@ -348,16 +348,16 @@ class ActionsCog(commands.Cog):
 
 
     @app_commands.command(
-        name='get-role-members',
-        description='Lists the server members that have the given role.'
+        name='who-has',
+        description='Lists the server members that have a given role.'
     )
-    async def get_role_members(
+    async def who_has(
         self, 
         interaction : Interaction, 
         role : Role
     ) -> None:
         """
-        Lists the server members that have the given role.
+        Lists the server members that have a given role.
 
         Parameters
         ----------
@@ -374,9 +374,12 @@ class ActionsCog(commands.Cog):
             return
 
         await interaction.response.send_message(
-            content=f'Members with the "{role.name}" role:\n- ' + '\n- '.join(
-                member.display_name for member in role.members
-            )
+            content=f'{len(role.members)} '
+                f'member{"" if len(role.members) == 1 else "s"} '
+                f'with the "{role.name}" role:\n- ' + 
+                '\n- '.join(
+                    member.display_name for member in role.members
+                )
         )
 
     @app_commands.command(
