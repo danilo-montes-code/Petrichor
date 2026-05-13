@@ -4,23 +4,24 @@ Contains the Cog that holds admin commands.
 """
 from __future__ import annotations
 
-import discord
-from discord import app_commands
-from discord.ext import commands
-
 from util.printing import print_petrichor_msg, print_petrichor_error
 from util.env_vars import get_id
 from Petrichor.cogs import EXTENSIONS
 
+import discord
+from discord import app_commands
+from discord.ext import commands
+from discord.ext.commands import (
+    ExtensionNotLoaded,
+    ExtensionNotFound,
+    NoEntryPointError,
+    ExtensionFailed
+)
+
+
 from typing import Literal
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from discord.ext.commands import (
-        ExtensionNotLoaded,
-        ExtensionNotFound,
-        NoEntryPointError,
-        ExtensionFailed
-    )
     from discord import Interaction
     from discord.ext.commands import Context
 
@@ -184,7 +185,7 @@ class AdminCog(commands.Cog):
             False, otherwise
         """
         
-        try: 
+        try:
             cog = cog_path.split('.')[-1]
             print_petrichor_msg(f'Attempting to reload: {cog}')
             await self.bot.reload_extension(cog_path)
