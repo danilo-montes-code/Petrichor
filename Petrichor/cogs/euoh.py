@@ -8,6 +8,8 @@ from discord import app_commands
 from discord.ext import commands
 from discord import Member
 
+from util.config import VC_EUOH_TYPES
+
 from typing import Literal
 from typing import TYPE_CHECKING
 
@@ -48,9 +50,9 @@ class EuohCog(commands.Cog):
     )
 
 
-    ################
-    ### VC Euohs
-    ################
+    #-----------------------------------------------------------------------------------
+    # VC Euohs
+    #-----------------------------------------------------------------------------------
 
     vc_euoh = app_commands.Group(
         name='vc',
@@ -76,12 +78,18 @@ class EuohCog(commands.Cog):
             interaction that triggered the command
         """
 
+        euohs = [
+            '__1 Scuzz Moment__ - Leave VC without saying anything',
+            '__1 Kaeley Moment__ - Say bye, but leave right after so no one else can say bye back (the worst one)',
+            '__1 Declan Moment__ - Say nothing/be muted for a period of time, and then randomly say bye and leave immediately',
+            '__1 Armando Moment__ - Be in the middle of a convo and then say you\'re going to leave because you are tired',
+            '__1 Max Moment__ - Not paying attention/listening (get off your damn phone)',
+            '__1 Max Yapment__ - Just saying some bullshiesty'
+        ]
+
         await interaction.response.send_message(
-            '# VC Euohs\n'
-            '1 Scuzz Moment - Leave VC without saying anything\n'
-            '1 Kaeley Moment - Say bye, but leave right after so no one else can say bye back (the worst one)\n'
-            '1 Declan Moment - Say nothing/be muted for a period of time, and then randomly say bye and leave immediately\n'
-            '1 Armando Moment - Be in the middle of a convo and then say you\'re going to leave because you are tired'
+            '# VC Euohs\n- ' +
+            '\n- '.join(euohs)
         )
 
 
@@ -93,15 +101,11 @@ class EuohCog(commands.Cog):
         self,
         interaction : Interaction,
         euoh_recipient : Member,
-        euoh_type : Literal[
-            'scuzz',
-            'kaeley', 
-            'declan', 
-            'armando'
-        ]
+        euoh_type : VC_EUOH_TYPES
     ) -> None:
         """
         Adds a given type of vc euoh to the person mentioned.
+
 
         Parameters
         ----------
@@ -109,7 +113,7 @@ class EuohCog(commands.Cog):
             interaction that triggered the command
         euoh_recipient : Member
             member to give the euoh to
-        euoh_type : Literal['scuzz', 'kaeley', 'declan', 'armando']
+        euoh_type : Literal['scuzz', 'kaeley', 'declan', 'armando', 'max moment', 'max yapment']
             type of euoh to give
         """
 
@@ -149,6 +153,7 @@ class EuohCog(commands.Cog):
         """
         Displays the number of VC Meuohments a user has.
 
+
         Parameters
         ----------
         interaction : Interaction
@@ -176,10 +181,16 @@ class EuohCog(commands.Cog):
             euoh_type : str = euoh_type_count['euoh_type']
             euoh_count : int = euoh_type_count['euoh_count']
 
-            msg = (
-                f"{euoh_count} {euoh_type.title()} "
-                f"Meuohment{'s' if euoh_count != 1 else ''}"
-            )
+            if len(euoh_type.split()) == 2:
+                msg = (
+                    f"{euoh_count} {euoh_type.title()}"
+                    f"{'s' if euoh_count != 1 else ''}"
+                )
+            else:
+                msg = (
+                    f"{euoh_count} {euoh_type.title()} "
+                    f"Meuohment{'s' if euoh_count != 1 else ''}"
+                )
             individual_vc_euoh_counts.append(msg)
 
 
@@ -190,9 +201,9 @@ class EuohCog(commands.Cog):
         await interaction.response.send_message(response)
 
 
-    ################
-    ### Apex Euohs
-    ################
+    #-----------------------------------------------------------------------------------
+    # Apex Euohs
+    #-----------------------------------------------------------------------------------
 
     apex_euoh = app_commands.Group(
         name='apex',
@@ -211,6 +222,7 @@ class EuohCog(commands.Cog):
     ) -> None:
         """
         Displays info about various types of Apex euohs.
+
 
         Parameters
         ----------
@@ -294,6 +306,7 @@ class EuohCog(commands.Cog):
     ) -> None:
         """
         Displays the number of Apex euohs a user has.
+
 
         Parameters
         ----------
