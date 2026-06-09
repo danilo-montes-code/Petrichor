@@ -61,11 +61,11 @@ class RecurringCog(commands.Cog):
             frequency='Daily',
             time=EST_MIDNIGHT
         )
-        self.start_task(
-            task_method=self.change_grok_owner,
-            frequency='Daily',
-            time=EST_MIDNIGHT
-        )
+        # self.start_task(
+        #     task_method=self.change_grok_owner,
+        #     frequency='Daily',
+        #     time=EST_MIDNIGHT
+        # )
 
     
     def cog_unload(self):

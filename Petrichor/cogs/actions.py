@@ -54,6 +54,7 @@ HELP_MESSAGES = [
         * `/kaeley total-side-eye-count` - get the total number of side eye reactions kaeley has made
 
         ## Assorted Commands
+        * `/boys-who-cried-israel`: get the number of times server members have reacted to messages with the israel flag emoji
         * `/dailies`: get the links to common dailies that we do
         * `/last-clip`: get the link of the last clip that the user posted in the POV channel
           * `game` - **(optional)** the game to search for, doesn\'t check for game by default (only works on clips sent as links)
@@ -67,7 +68,7 @@ HELP_MESSAGES = [
         # Petrichor Functions
         * repost game clips to the `#pov-ur-bad` channel
         * change pinging channel to a random friend everyday at midnight
-        * change @Grok role owner to a random friend everyday at midnight
+        * **[DISABLED]** change @Grok role owner to a random friend everyday at midnight
         * type @vc in a Voice Channel\'s text chat to automatically ping everyone currently in VC
         * **[DISABLED]** occassionally send responses to messages with embeds (and embed fails)
         * **[DISABLED]** crazy? i was crazy once

@@ -26,6 +26,20 @@ if TYPE_CHECKING:
     from discord.ext.commands import Context
 
 
+COGS = Literal[
+    'actions',
+    'boys_who_cried',
+    'euoh_admin',
+    'euoh',
+    'event_handlers',
+    'general_admin',
+    'general_dev',
+    'recurring',
+    # 'reminders',
+    'roll_the_ping',
+    'val'
+]
+
 
 class AdminCog(commands.Cog):
     """
@@ -110,18 +124,7 @@ class AdminCog(commands.Cog):
     async def reload_cog(
         self, 
         interaction : Interaction,
-        cog : Literal[
-            'actions',
-            'euoh_admin',
-            'euoh',
-            'event_handlers',
-            'general_admin',
-            'general_dev',
-            'recurring',
-            # 'reminders',
-            'roll_the_ping',
-            'val'
-        ]
+        cog : COGS
     ) -> None:
         """
         Reloads a given Cog.

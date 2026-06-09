@@ -84,3 +84,27 @@ CREATE TABLE IF NOT EXISTS kaeley_side_eyes(
 `message_type` : `boolean`
 - true for TextMessage
 - false for Reaction
+
+
+## `boys_who_cried` Table
+Used to hold the occurrences of a server member reacting to a message with the israel flag.
+
+```sql
+CREATE TABLE IF NOT EXISTS boys_who_cried(
+    cry_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    guild_id VARCHAR(20),
+    channel_id VARCHAR(20),
+    message_id VARCHAR(20),
+    user_id VARCHAR(20),
+    message_type BOOLEAN,
+    message_time TIMESTAMPTZ
+);
+```
+
+`message_type` : `boolean`
+- true for TextMessage
+- false for Reaction
+
+`message_id` : `VARCHAR(20)`
+- if `message_type` == true, then this will hold the ID of the message that contains the emoji
+- if `message_type` == false, then this will hold the ID of the message that was reaction to
