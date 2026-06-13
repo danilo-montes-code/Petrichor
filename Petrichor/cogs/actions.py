@@ -153,7 +153,7 @@ class ActionsCog(commands.Cog):
             )
             return
         
-        pov_channel : TextChannel = self.bot.get_channel(get_id('APEX_POV_ID'))
+        pov_channel : TextChannel = self.bot.get_channel(get_id('KNS_POV_ID'))
 
         if not pov_channel:
             print_petrichor_error('Clips channel not found.')

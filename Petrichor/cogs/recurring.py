@@ -111,7 +111,7 @@ class RecurringCog(commands.Cog):
 
         await self.bot.wait_until_ready()
 
-        channel : TextChannel = self.bot.get_channel(get_id('APEX_PINGING_ID'))
+        channel : TextChannel = self.bot.get_channel(get_id('KNS_PINGING_ID'))
         
         old_name = new_name = channel.name.split('-')[1]
         while new_name == old_name:
@@ -135,7 +135,7 @@ class RecurringCog(commands.Cog):
         kns_id = get_id('KNS_ID')
         guild = self.bot.get_guild(kns_id) \
                     or await self.bot.fetch_guild(kns_id)
-        grok_role_id = get_id('APEX_GROK_ROLE_ID')
+        grok_role_id = get_id('KNS_GROK_ROLE_ID')
         grok_role = guild.get_role(grok_role_id) \
                     or await guild.fetch_role(grok_role_id)
         
