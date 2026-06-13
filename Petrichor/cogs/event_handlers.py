@@ -167,7 +167,7 @@ class EventHandlersCog(commands.Cog):
             the message that was sent
         """
 
-        if message.channel.id != get_id('APEX_GAME_UPDATES'):
+        if message.channel.id != get_id('KNS_GAME_UPDATES'):
             return
 
         if message.author.id in (get_id('PETRICHOR_ID'), get_id('PETRICHOR_TESTING_ID')):
@@ -205,7 +205,7 @@ class EventHandlersCog(commands.Cog):
 
 
         # dont run this in the clips channel bc that would be too much spam
-        if message.channel.id == get_id('APEX_POV_ID'):
+        if message.channel.id == get_id('KNS_POV_ID'):
             return
 
         # only run this 2% of the time because it would get annoying real quick
@@ -269,7 +269,7 @@ class EventHandlersCog(commands.Cog):
                 
         text_to_send = self._replace_name_with_id(message.content)
 
-        await self.post_to_pov(text_to_send)
+        await self.repost_to_channel(text_to_send)
 
 
     async def ping_vc(
@@ -356,18 +356,27 @@ class EventHandlersCog(commands.Cog):
         await power.send(content=message_content)
 
 
-    async def post_to_pov(self, message_content : str) -> None:
+    async def repost_to_channel(self, message_content : str) -> None:
         """
-        Posts a clip from my archive server's game clips channels
-        to the POV game clips channel.
+        Reposts a clip from my archive server's game clips channels
+        to one of the game clips channels. The message should start with the respective
+        flag for which server should be posted to. Defaults to kidnamedsoub.
+        Options are: !guard
+
 
         Parameters
         ----------
         message_content : str
             the message to be transferred
         """
-        power = self.bot.get_channel(get_id('APEX_POV_ID'))
-        await power.send(content=message_content)
+
+        if message_content.startswith("!guard"):
+            channel = self.bot.get_channel(get_id('GUARD_POV_ID'))
+            message_content = message_content.replace("!guard ", "")
+        else:
+            channel = self.bot.get_channel(get_id('KNS_POV_ID'))
+
+        await channel.send(content=message_content)
 
 
     async def respond_to_user(self, message : Message, response : str) -> None:
