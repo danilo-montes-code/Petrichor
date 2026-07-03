@@ -9,18 +9,21 @@ import textwrap
 
 from discord import app_commands, Role
 from discord.ext import commands
+from discord import (
+    Forbidden,
+    HTTPException
+)
 
 from util.printing import print_petrichor_error
 from util.env_vars import get_id, get_dict
+from util.server_info import SERVERS
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from discord import (
         Interaction,
         TextChannel,
-        Message,
-        Forbidden,
-        HTTPException
+        Message
     )
 
     from Petrichor.PetrichorBot import PetrichorBot
@@ -117,8 +120,6 @@ class ActionsCog(commands.Cog):
         await interaction.response.send_message(content=self.bot.latency)
 
 
-    # TODO maybe making into hybrid command? if the app command is too long,
-    # a standard command might be able to handle the increased wait time
     @app_commands.command(
         name='last-clip',
         description='Gets the link of the user\'s most recent posted clip'
@@ -133,6 +134,7 @@ class ActionsCog(commands.Cog):
         """
         Gets the link of the last clip that the user posted in the POV channel.
         
+
         Parameters
         ----------
         interaction : Interaction
@@ -153,13 +155,16 @@ class ActionsCog(commands.Cog):
             )
             return
         
-        pov_channel : TextChannel = self.bot.get_channel(get_id('KNS_POV_ID'))
+        await interaction.response.defer(ephemeral=False)
+        
+        pov_channel : TextChannel = self._get_repost_channel(interaction)
 
         if not pov_channel:
             print_petrichor_error('Clips channel not found.')
             return
 
-        if game: game = game.lower()
+        if game:
+            game = game.lower()
 
         try:
             message : Message
@@ -183,14 +188,14 @@ class ActionsCog(commands.Cog):
                     skip -= 1
                     continue
             
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     content= \
                     f'Your last game clip was here: {message.jump_url}'
                 )
                     
                 return
                 
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 content= \
                 (
                     'No recent game clips found. You may want to search '
@@ -207,6 +212,43 @@ class ActionsCog(commands.Cog):
             print_petrichor_error('Status:' + str(err.status))
         except Exception as err:
             print_petrichor_error('Other exception raised:' + str(err))
+
+
+    def _get_repost_channel(self, interaction : Interaction) -> TextChannel | None:
+        """
+        Returns the repost channel that lives in the server that the command was 
+        called in.
+
+        
+        Parameters
+        ----------
+        interaction : Interaction
+            the interaction that evoked the command
+        
+        Returns
+        -------
+        TextChannel
+            the channel to repost to
+        None
+            if either there is no ServerInfo object for the given server,
+            of if there is no repost channel id for the given server
+        """
+        
+        for server_info in SERVERS.values():
+            if server_info.guild_id == interaction.guild_id:
+                return self.bot.get_channel(server_info.repost_channel_id)
+        
+        if interaction.guild_id not in [server.guild_id for server in SERVERS.values()]:
+            print_petrichor_error(
+                f'No ServerInfo object exists for server with id: {interaction.guild_id}'
+            )
+
+        elif interaction.channel_id not in [server.repost_channel_id for server in SERVERS.values()]:
+            print_petrichor_error(
+                f'No repost channel exists for server with id: {interaction.guild_id}'
+            )
+
+        return None
 
 
     def _message_has_clip_link_or_mp4(self, message : Message) -> bool:
