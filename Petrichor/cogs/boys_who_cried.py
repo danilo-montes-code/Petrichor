@@ -85,8 +85,12 @@ class BoysWhoCried(commands.Cog):
             the user who added the reaction
         """
 
-        if str(reaction.emoji) != '🇮🇱':
+        emoji_str = str(reaction.emoji)
+
+        if not self._is_flag_emoji(emoji_str):
             return
+
+        reaction_is_israel_flag = emoji_str == '🇮🇱'
 
         inserted_successfully = await self.bot.db.insert_row(
             table_name='boys_who_cried',
@@ -96,7 +100,8 @@ class BoysWhoCried(commands.Cog):
                 reaction.message.id,
                 user.id,
                 False,
-                datetime.now(timezone.utc).astimezone()
+                datetime.now(timezone.utc).astimezone(),
+                reaction_is_israel_flag
             ]
         )
 
@@ -105,9 +110,40 @@ class BoysWhoCried(commands.Cog):
             return
 
         print_petrichor_msg(
-            f'Logged israel flag emoji reaction from user {user.display_name}.'
+            f'Logged {'israel ' if reaction_is_israel_flag else ''}flag emoji reaction from user {user.display_name}.'
         )
 
+
+    def _is_flag_emoji(self, emoji: str) -> bool:
+        """
+        Checks if a given emoji is a flag emoji.
+
+
+        Parameters
+        ----------
+        emoji : str
+            the emoji to check
+
+        Returns
+        -------
+        bool
+            True if the emoji is a flag emoji |
+            False otherwise 
+        """
+
+        # 1. Handle standard country flags (Regional Indicator Pairs)
+        # Range covers 🇦 (U+1F1E6) through 🇿 (U+1F1FF)
+        if all('\U0001F1E6' <= char <= '\U0001F1FF' for char in emoji) and len(emoji) == 2:
+            return True
+
+        # 2. Handle special compound flags (e.g., Rainbow Flag 🏳️‍🌈, Pirate Flag 🏴‍☠️)
+        # These usually start with White Flag (🏳️) or Black Flag (🏴)
+        special_flag_bases = ('\U0001F3F3', '\U0001F3F4') 
+        if emoji.startswith(special_flag_bases):
+            return True
+
+        return False
+    
 
     async def check_for_israel_flag(
         self,
@@ -123,10 +159,12 @@ class BoysWhoCried(commands.Cog):
             the message that was sent
         """
 
-        israel_flag_in_msg = self._israel_flag_emoji_in_message(message.content)
+        any_flag_in_msg = self._general_flag_emoji_in_message(message.content)
 
-        if not israel_flag_in_msg:
+        if not any_flag_in_msg:
             return
+        
+        israel_flag_in_msg = self._israel_flag_emoji_in_message(message.content)
 
         inserted_successfully = await self.bot.db.insert_row(
             table_name='boys_who_cried',
@@ -136,16 +174,17 @@ class BoysWhoCried(commands.Cog):
                 message.id,
                 message.author.id,
                 True,
-                message.created_at
+                message.created_at,
+                israel_flag_in_msg
             ]
         )
 
         if not inserted_successfully:
-            print_petrichor_error('Failed to log israel flag emoji message.')
+            print_petrichor_error('Failed to log flag emoji message.')
             return
-
+        
         print_petrichor_msg(
-            f'Logged israel flag emoji message from user {message.author.display_name}.'
+            f'Logged {'israel ' if israel_flag_in_msg else ''}flag emoji message from user {message.author.display_name}.'
         )
 
 
@@ -169,6 +208,28 @@ class BoysWhoCried(commands.Cog):
             False, otherwise
         """
         return '🇮🇱' in str(message)
+
+
+    def _general_flag_emoji_in_message(
+        self,
+        message : str
+    ) -> bool:
+        """
+        Checks if any flag emoji is in the message.
+
+
+        Parameters
+        ----------
+        message : str
+            the message to check
+
+        Returns
+        -------
+        bool
+            True, if a flag emoji is in the message |
+            False, otherwise
+        """
+        return 'flag' in str(message)
 
 
     @app_commands.command(

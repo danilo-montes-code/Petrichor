@@ -97,7 +97,8 @@ CREATE TABLE IF NOT EXISTS boys_who_cried(
     message_id VARCHAR(20),
     user_id VARCHAR(20),
     message_type BOOLEAN,
-    message_time TIMESTAMPTZ
+    message_time TIMESTAMPTZ,
+    true_react BOOLEAN
 );
 ```
 
@@ -108,3 +109,7 @@ CREATE TABLE IF NOT EXISTS boys_who_cried(
 `message_id` : `VARCHAR(20)`
 - if `message_type` == true, then this will hold the ID of the message that contains the emoji
 - if `message_type` == false, then this will hold the ID of the message that was reaction to
+
+`true_react` : `boolean`
+- true if the reaction was an actual flag
+- false otherwise (tried to get around it)
