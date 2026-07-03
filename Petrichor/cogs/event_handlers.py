@@ -11,6 +11,7 @@ from discord.ext import commands
 from discord import VoiceChannel
 
 from util.env_vars import get_id, get_dict
+from util.server_info import SERVERS
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -21,6 +22,7 @@ if TYPE_CHECKING:
     )
 
     from Petrichor.PetrichorBot import PetrichorBot
+    from util.server_info import ServerInfo
 
 
 EMBED_FAILS = [
@@ -42,6 +44,10 @@ EMBED_FAIL_EXCEPTIONS = [
     'instagram.com',
     'discordapp.com'
 ]
+
+DEFAULT_REPOST_SERVERS = {
+    "apex-legends" : SERVERS["guard"]
+}
 
 
 
@@ -342,20 +348,6 @@ class EventHandlersCog(commands.Cog):
         return message
 
 
-    async def post_to_power(self, message_content: str) -> None:
-        """
-        Posts a given message from my archive server's game clips channels
-        to the soup game clips channel.
-
-        Parameters
-        ----------
-        message_content : str
-            the message to be transferred
-        """
-        power = self.bot.get_channel(get_id('SOUP_POWER_ID'))
-        await power.send(content=message_content)
-
-
     async def repost_to_channel(self, message_content : str) -> None:
         """
         Reposts a clip from my archive server's game clips channels
@@ -370,13 +362,85 @@ class EventHandlersCog(commands.Cog):
             the message to be transferred
         """
 
-        if message_content.startswith("!guard"):
-            channel = self.bot.get_channel(get_id('GUARD_POV_ID'))
-            message_content = message_content.replace("!guard ", "")
-        else:
-            channel = self.bot.get_channel(get_id('KNS_POV_ID'))
+        server_to_repost_to = self._get_server_to_repost(message_content)
+        message_content = self._clean_message_content(message_content)
 
+        channel = self.bot.get_channel(server_to_repost_to.repost_channel_id)
         await channel.send(content=message_content)
+
+    
+    def _get_server_to_repost(self, message_content : str) -> ServerInfo:
+        """
+        Returns the server to repost to based on the given message content.
+        Defaults to kidnamedsoub if no server is specified.
+
+        
+        Parameters
+        ----------
+        message_content : str
+            the message to be transferred
+
+        Returns
+        -------
+        ServerInfo
+            the server to repost to
+        """
+
+        for server in SERVERS.values():
+            if message_content.startswith(f"!{server.guild_flag}"):
+                return server
+            
+        if default_server := self._check_for_default_server_for_game(message_content):
+            return default_server
+
+        return SERVERS["kns"]
+    
+    def _check_for_default_server_for_game(self, message_content : str) -> ServerInfo | None:
+        """
+        Returns the default server to report for a given game, if one exists.
+
+
+        Parameters
+        ----------
+        message_content : str
+            the message to check for a default server
+
+        Returns
+        -------
+        ServerInfo
+            the default server
+        None
+            if no server default exists
+        """
+
+        for game, server in DEFAULT_REPOST_SERVERS.items():
+            if game in message_content:
+                return server
+            
+        return None
+
+
+    def _clean_message_content(self, message_content : str) -> str:
+        """
+        Removes the flag from the beginning of the message if present.
+
+        
+        Parameters
+        ----------
+        message_content : str
+            the message to clean
+        
+        Returns
+        -------
+            the cleaned message
+        """
+
+        if message_content.startswith("!"):
+
+            flag_cutoff = message_content.index(" ")
+            return message_content[flag_cutoff+1:]
+        
+        return message_content
 
 
     async def respond_to_user(self, message : Message, response : str) -> None:

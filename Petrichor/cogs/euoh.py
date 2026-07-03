@@ -329,14 +329,69 @@ class EuohCog(commands.Cog):
             )
 
 
+        response = self._generate_apex_euoh_response(euoh_recipient, euoh_type_counts)
+        
+        await interaction.response.send_message(response)
+
+    
+    @apex_euoh.command(
+        name='list',
+        description='Lists all Apex euoh counts'
+    )
+    async def apex_euohs_list(
+        self,
+        interaction : Interaction
+    ) -> None:
+        
+        server = self.bot.get_guild(int(interaction.guild_id))
+        members = list(server.members)
+        full_msg = '# Apex Euohs\n'
+        members_to_include: list[tuple[Member, list[Record]]] = []
+
+        for member in members:
+
+            member_counts = await self.bot.db.fetch_rows(
+                table_name='apex_euohs',
+                columns=['COUNT(*) euoh_count', 'euoh_type', 'recipient_id'],
+                group_by=['euoh_type', 'recipient_id'],
+                where=f"guild_id = '{interaction.guild_id}' AND recipient_id = '{member.id}'"
+            )
+
+            if not member_counts:
+                continue
+
+            members_to_include.append((member, member_counts))
+
+
+        full_msg += '\n'.join([
+            self._generate_apex_euoh_response(
+                member[0], 
+                member[1], 
+                full_list=True
+            )
+            for member
+            in members_to_include
+        ])
+
+        await interaction.response.send_message(full_msg)
+
+
+    def _generate_apex_euoh_response(
+        self,
+        euoh_recipient : Member,
+        euoh_type_counts : list[Record],
+        full_list : bool = False
+    ) -> str:
+        
         individual_apex_euoh_counts : list[str] = []
         standard_euohs : list[float] = [0.0, 0.0]
 
-        
+
         for euoh_type_count in euoh_type_counts:
             euoh_type : str = euoh_type_count['euoh_type']
             euoh_count : int = euoh_type_count['euoh_count']
 
+            # continue after each so standard euohs aren't added to the list doubly
             if euoh_type == 'euoh':
                 standard_euohs[0] = euoh_count
                 continue
@@ -351,15 +406,13 @@ class EuohCog(commands.Cog):
             individual_apex_euoh_counts.append(msg)
 
 
-        response = \
-            f'# {euoh_recipient.display_name} Apex Euohs\n' \
-            f'- Euohs: {sum(standard_euohs)} ({standard_euohs[0]} Euohs, {standard_euohs[1]} Half Euohs)' + \
+        return \
+            f'#{'#'*int(full_list)} {euoh_recipient.display_name} Apex Euohs\n' \
+            f'- Standard Euohs: {sum(standard_euohs)} ({standard_euohs[0]} Euohs, {standard_euohs[1]} Half Euohs)' + \
             f'{"\n- " if individual_apex_euoh_counts else ""}' + \
             '\n- '.join(individual_apex_euoh_counts)
-        
-        await interaction.response.send_message(response)
 
-
+                
 
 async def setup(bot : commands.Bot) -> None:
     """
