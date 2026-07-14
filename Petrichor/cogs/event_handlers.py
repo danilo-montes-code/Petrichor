@@ -94,6 +94,7 @@ class EventHandlersCog(commands.Cog):
 
         await self.repost_game_clips(message)
         await self.ping_vc(message)
+        await self.update_twitter_link(message)
 
         # await self.crazy_check(message)
         # await self.embed_evaluation(message)
@@ -200,7 +201,7 @@ class EventHandlersCog(commands.Cog):
                                 .fetch_message(message.id)
 
         if not message.embeds:
-            if 'https://' not in message.content:
+            if 'https://' not in message.content: # TODO uses old link check method
                 return
             
             if self._link_is_an_embed_exception(message.content):
@@ -242,6 +243,70 @@ class EventHandlersCog(commands.Cog):
         """
 
         return any(link in message for link in EMBED_FAIL_EXCEPTIONS)
+
+
+    def _link_in_message(self, message : Message) -> bool:
+        """
+        Verifies if a given message has a link inside.
+
+        
+        Parameters
+        ----------
+        message : Message
+            the message to check for a link in
+        
+        Returns
+        -------
+        bool
+            True, if the message has a link |
+            False, otherwise
+        """
+        return len(message.embeds) > 0
+
+
+    async def update_twitter_link(self, message : Message) -> None:
+        """
+        Updates a sent Twitter link to use fxtwitter.
+        
+        Parameters
+        ----------
+        message : Message
+            the message to update
+        """
+
+        if not self._link_in_message(message):
+            return
+                
+        # Note: order matters here if a list comprehension without break behavior
+        # parity is used, since this could double up on replacing "twitter.com"
+        twitter_domains = ( 
+            'twitter.com',
+            'x.com',
+        )
+        new_links : list[str] = [
+            # next(
+            #     embed.url.replace(domain, "fxtwitter.com") 
+            #     for domain 
+            #     in twitter_domains 
+            #     if domain in embed.url
+            # )
+            # for embed in message.embeds
+            # if any(domain in embed.url for domain in twitter_domains)
+        ]
+
+        for embed in message.embeds:
+            for domain in twitter_domains:
+                if domain in embed.url:
+                    new_links.append(embed.url.replace(domain, "fxtwitter.com"))
+                    break
+
+        if not new_links:
+            return
+
+        await message.reply(
+            content="\n".join(new_links),
+            mention_author=False
+        )
 
 
 
@@ -394,7 +459,8 @@ class EventHandlersCog(commands.Cog):
             return default_server
 
         return SERVERS["kns"]
-    
+
+
     def _check_for_default_server_for_game(self, message_content : str) -> ServerInfo | None:
         """
         Returns the default server to report for a given game, if one exists.
