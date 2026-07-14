@@ -261,7 +261,7 @@ class EventHandlersCog(commands.Cog):
             True, if the message has a link |
             False, otherwise
         """
-        return len(message.embeds) > 0
+        return len(message.embeds) > 0 or 'https://' in message.content
 
 
     async def update_twitter_link(self, message : Message) -> None:
