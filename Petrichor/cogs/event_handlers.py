@@ -261,7 +261,75 @@ class EventHandlersCog(commands.Cog):
             True, if the message has a link |
             False, otherwise
         """
-        return len(message.embeds) > 0 or 'https://' in message.content
+        return 'https://' in message.content or len(message.embeds) > 0
+
+
+    def _get_links_from_message(
+        self, 
+        message : Message, 
+        domains : list[str] | None = None
+    ) -> list[str]:
+        """
+        Parses the links from a message and returns the list of links.
+        If domains is present, will only return links that are amongst one of the
+        domains.
+
+        
+        Parameters
+        ----------
+        message : Message
+            the message to check for a link in
+        domains : list[str], optional
+            the domains of the links that you wish to return
+        
+        Returns
+        -------
+        list[str]
+            The links that were in the message
+        """
+
+        if not domains:
+            return [
+                term
+                for term
+                in message.content.split(" ")
+                if term.startswith("https://")
+            ]
+
+        return [
+            term
+            for term
+            in message.content.split(" ")
+            if term.startswith("https://") 
+            and any(term.startswith(domain) for domain in domains)
+        ]
+
+
+    def _get_twitter_links(self, message : Message) -> list[str]:
+        """
+        Parses the Twitter links from a message and returns the list of links.
+
+
+        Parameters
+        ----------
+        message : Message
+            the message to check for a link in
+
+
+        Returns
+        -------
+        list[str]
+            The Twitter links that were in the message
+        """
+
+        return self._get_links_from_message(
+            message=message,
+            domains=[
+                'https://twitter.com',
+                'https://x.com',
+            ]
+        )
+
 
 
     async def update_twitter_link(self, message : Message) -> None:
@@ -277,32 +345,17 @@ class EventHandlersCog(commands.Cog):
 
         if not self._link_in_message(message):
             return
-                
-        # Note: order matters here if a list comprehension without break behavior
-        # parity is used, since this could double up on replacing "twitter.com"
-        twitter_domains = ( 
-            'https://twitter.com',
-            'https://x.com',
-        )
-        new_links : list[str] = [
-            # next(
-            #     embed.url.replace(domain, "fxtwitter.com") 
-            #     for domain 
-            #     in twitter_domains 
-            #     if domain in embed.url
-            # )
-            # for embed in message.embeds
-            # if any(domain in embed.url for domain in twitter_domains)
-        ]
 
-        for embed in message.embeds:
-            for domain in twitter_domains:
-                if domain in embed.url:
-                    new_links.append(embed.url.replace(domain, "https://fxtwitter.com"))
-                    break
+        twitter_links_in_message = self._get_twitter_links(message)
 
-        if not new_links:
+        if not twitter_links_in_message:
             return
+
+        new_links : list[str] = [
+            "https://fxtwitter.com" + link[link.index(".com") + 4:]
+            for link
+            in twitter_links_in_message
+        ]
 
         # suppress the original message to remove unnecessary duplicated embed
         await message.edit(
