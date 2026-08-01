@@ -4,20 +4,20 @@ Contains the Cog that manages message reactions.
 """
 from __future__ import annotations
 
-import random
 import asyncio
+import random
+from typing import TYPE_CHECKING
 
-from discord.ext import commands
 from discord import VoiceChannel
+from discord.ext import commands
 
-from util.env_vars import get_id, get_dict
+from util.env_vars import get_dict, get_id
 from util.server_info import SERVERS
 
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from discord import (
-        Message, 
         Member,
+        Message,
         Role,
     )
 
@@ -267,6 +267,7 @@ class EventHandlersCog(commands.Cog):
     async def update_twitter_link(self, message : Message) -> None:
         """
         Updates a sent Twitter link to use fxtwitter.
+
         
         Parameters
         ----------
@@ -280,8 +281,8 @@ class EventHandlersCog(commands.Cog):
         # Note: order matters here if a list comprehension without break behavior
         # parity is used, since this could double up on replacing "twitter.com"
         twitter_domains = ( 
-            'twitter.com',
-            'x.com',
+            'https://twitter.com',
+            'https://x.com',
         )
         new_links : list[str] = [
             # next(
@@ -297,11 +298,16 @@ class EventHandlersCog(commands.Cog):
         for embed in message.embeds:
             for domain in twitter_domains:
                 if domain in embed.url:
-                    new_links.append(embed.url.replace(domain, "fxtwitter.com"))
+                    new_links.append(embed.url.replace(domain, "https://fxtwitter.com"))
                     break
 
         if not new_links:
             return
+
+        # suppress the original message to remove unnecessary duplicated embed
+        await message.edit(
+            suppress=True
+        )
 
         await message.reply(
             content="\n".join(new_links),
