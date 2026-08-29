@@ -15,11 +15,7 @@ from util.env_vars import get_dict, get_id
 from util.server_info import SERVERS
 
 if TYPE_CHECKING:
-    from discord import (
-        Member,
-        Message,
-        Role,
-    )
+    from discord import Member, Message, Reaction, Role, User
 
     from Petrichor.PetrichorBot import PetrichorBot
     from util.server_info import ServerInfo
@@ -48,6 +44,8 @@ EMBED_FAIL_EXCEPTIONS = [
 DEFAULT_REPOST_SERVERS = {
     "apex-legends" : SERVERS["guard"]
 }
+
+BOT_IDS = (get_id('PETRICHOR_ID'), get_id('PETRICHOR_TESTING_ID'))
 
 
 
@@ -120,6 +118,57 @@ class EventHandlersCog(commands.Cog):
         )
 
 
+    @commands.Cog.listener()
+    async def on_reaction_add(
+        self, 
+        reaction : Reaction, 
+        user : User
+    ) -> None:
+        """
+        Checks for added reactions.
+
+
+        Parameters
+        ----------
+        reaction : Reaction
+            the current state of the reaction
+        user : User
+            the user who added the reaction
+        """
+
+        await self.sync_twitter_reactions(reaction)
+
+
+    async def sync_twitter_reactions(self, reaction : Reaction) -> None:
+        """
+        Syncs reactions to Twitter links between the bot's fxtwitter reply and the 
+        original post.
+
+        Note: Currently only works when reacting to the bot's message. Reactions to the 
+              original message stay there.
+        """
+        # bot to og message
+        if not reaction.message.reference:
+            return
+
+        if not reaction.message.author.id in BOT_IDS:
+            return
+
+        if 'fxtwitter' not in reaction.message.content:
+            return
+
+        og_message : Message = await reaction.message.channel.fetch_message(
+            reaction.message.reference.message_id
+        )
+
+        await og_message.add_reaction(reaction.emoji)
+
+        # og message to bot
+        # NOTE: for this direction, would have to write a helper function to search 
+        # through the chat history and see what messages replied to the og message and
+        # only pick the Petrichor response
+
+
 
     ##############################################################
     #######                                                #######
@@ -177,7 +226,7 @@ class EventHandlersCog(commands.Cog):
         if message.channel.id != get_id('KNS_GAME_UPDATES'):
             return
 
-        if message.author.id in (get_id('PETRICHOR_ID'), get_id('PETRICHOR_TESTING_ID')):
+        if message.author.id in BOT_IDS:
             return
 
         await self.respond_to_user(message=message, response='igh bro')

@@ -10,6 +10,7 @@ Petrichor is a mutlipurpose Discord Bot for my server with my friends.
 * changes pinging channel to a random friend everyday at midnight
 * reassigns Grok role to a random friend everyday at midnight
 * replace `x.com` and `twitter.com` links with `fxtwitter.com` in a message reply
+  * transfers reactions on the bot's reply to the original message (one way, either non-custom emoji or emoji from server the bot is in)
 
 ## Slash Commands
 
